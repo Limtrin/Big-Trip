@@ -1,6 +1,6 @@
 # Личный проект «Большое путешествие» [![Build status][travis-image]][travis-url]
 
-* Студент: [Неопознанный енот](https://up.htmlacademy.ru/ecmascript/10/user/930699).
+* Студент: [Александр Федюнин](https://up.htmlacademy.ru/ecmascript/10/user/930699).
 * Наставник: [Андрей Рыжаков](https://up.htmlacademy.ru/ecmascript/10/user/201015).
 
 ---
