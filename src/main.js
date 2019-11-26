@@ -335,7 +335,7 @@ const tripDayElement = siteMainElement.querySelector(`.trip-days`);
 render(tripDayElement, createEventEditTemplate(), `beforebegin`);
 render(tripDayElement, createTripDayListTemplate(), `beforeend`);
 
-const eventsListElement = siteTripDayElement.querySelector(`.trip-events__list`);
+const eventsListElement = tripDayElement.querySelector(`.trip-events__list`);
 new Array(EVENT_COUNT)
     .fill(``)
     .forEach(
