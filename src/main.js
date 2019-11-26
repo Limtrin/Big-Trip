@@ -263,7 +263,7 @@ const createEventEditTemplate = () => {
 };
 
 const createTripDayListTemplate = () => {
-  return(
+  return (
     `<li class="trip-days__item  day">
       <div class="day__info">
         <span class="day__counter">1</span>
@@ -274,7 +274,7 @@ const createTripDayListTemplate = () => {
       </ul>
     </li>`
   );
-}
+};
 
 const createItemTemplate = () => {
   return (
@@ -331,9 +331,9 @@ render(siteControlsElement.lastElementChild, createFilterTemplate(), `afterend`)
 const siteMainElement = document.querySelector(`.trip-events`);
 render(siteMainElement, createBoardTemplate(), `beforeend`);
 
-const siteTripDayElement = siteMainElement.querySelector(`.trip-days`);
-render(siteTripDayElement, createEventEditTemplate(), `beforebegin`);
-render(siteTripDayElement, createTripDayListTemplate(), `beforeend`);
+const tripDayElement = siteMainElement.querySelector(`.trip-days`);
+render(tripDayElement, createEventEditTemplate(), `beforebegin`);
+render(tripDayElement, createTripDayListTemplate(), `beforeend`);
 
 const eventsListElement = siteTripDayElement.querySelector(`.trip-events__list`);
 new Array(EVENT_COUNT)
