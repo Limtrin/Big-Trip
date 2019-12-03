@@ -1,8 +1,19 @@
-export const createSiteMenuTemplate = () => {
+const createMenuMarkup = (items) => {
+  return items
+    .map((item) => {
+      return (
+        `<a class="trip-tabs__btn" href="#">${item}</a>`
+      );
+    })
+    .join(`\n`);
+};
+
+export const createSiteMenuTemplate = (menuItems) => {
+  const menuMarkup = createMenuMarkup(menuItems);
+
   return (
     `<nav class="trip-controls__trip-tabs  trip-tabs">
-      <a class="trip-tabs__btn" href="#">Table</a>
-      <a class="trip-tabs__btn  trip-tabs__btn--active" href="#">Stats</a>
+      ${menuMarkup}
     </nav>`
   );
 };
