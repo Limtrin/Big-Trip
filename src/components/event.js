@@ -25,7 +25,7 @@ const createDateDifference = (startDate, endDate) => {
 
 export const createItemTemplate = (event) => {
 
-  const {type, city, photos, description, dateBegining, dateEnding, price, offers} = event;
+  const {type, city, dateBegining, dateEnding, price, offers} = event;
 
   const typePlaceholder = eventTypeTransfer.includes(type) ? `${textCapitalize(type)} to ${city}` : `${textCapitalize(type)} in ${city}`;
 

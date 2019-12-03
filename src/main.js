@@ -5,7 +5,7 @@ import {createBoardTemplate} from './components/board.js';
 import {createEventEditTemplate} from './components/edit-event.js';
 import {createTripDayListTemplate} from './components/day-list.js';
 import {createItemTemplate} from './components/event.js';
-import {generateEvent, generateEventList} from './mock/event.js';
+import {generateEventList} from './mock/event.js';
 import {filterItems} from './mock/filter.js';
 import {menuItems} from './mock/site-menu.js';
 
