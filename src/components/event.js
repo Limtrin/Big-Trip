@@ -1,5 +1,5 @@
 import {eventTypeTransfer} from '../constants.js';
-import {formatTimeDifference, formatTimeEvent} from '../utils.js';
+import {formatTimeDifference, formatTimeEvent, createElement} from '../utils.js';
 
 const textCapitalize = (text) => {
   return text[0].toUpperCase() + text.slice(1);
@@ -23,7 +23,7 @@ const createDateDifference = (startDate, endDate) => {
   return endDate.getTime() - startDate.getTime();
 };
 
-export const createItemTemplate = (event) => {
+const createItemTemplate = (event) => {
 
   const {type, city, dateBegining, dateEnding, price, offers} = event;
 
@@ -66,3 +66,26 @@ export const createItemTemplate = (event) => {
     </li>`
   );
 };
+
+export default class Event {
+  constructor(date) {
+    this._date = date;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createItemTemplate(this._date);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

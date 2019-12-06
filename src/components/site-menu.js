@@ -1,3 +1,5 @@
+import {createElement} from '../utils.js';
+
 const createMenuMarkup = (items) => {
   return items
     .map((item) => {
@@ -8,7 +10,7 @@ const createMenuMarkup = (items) => {
     .join(`\n`);
 };
 
-export const createSiteMenuTemplate = (menuItems) => {
+const createSiteMenuTemplate = (menuItems) => {
   const menuMarkup = createMenuMarkup(menuItems);
 
   return (
@@ -17,3 +19,27 @@ export const createSiteMenuTemplate = (menuItems) => {
     </nav>`
   );
 };
+
+
+export default class Menu {
+  constructor(menuItems) {
+    this._menuItems = menuItems;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createSiteMenuTemplate(this._menuItems);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
