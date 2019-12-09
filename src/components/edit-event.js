@@ -1,5 +1,5 @@
 import {eventTypeTransfer, eventTypeActivity, cityList} from '../constants.js';
-import {formatTime} from '../utils.js';
+import {formatTime, createElement} from '../utils.js';
 
 const textCapitalize = (text) => {
   return text[0].toUpperCase() + text.slice(1);
@@ -55,7 +55,7 @@ const createOfferListMarkup = (offers) => {
     .join(`\n`);
 };
 
-export const createEventEditTemplate = (event) => {
+const createEventEditTemplate = (event) => {
 
   const {type, city, photos, description, dateBegining, dateEnding, price, offers} = event;
 
@@ -146,3 +146,26 @@ export const createEventEditTemplate = (event) => {
     </form>`
   );
 };
+
+export default class DayList {
+  constructor(event) {
+    this._event = event;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createEventEditTemplate(this._event);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
