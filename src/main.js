@@ -13,7 +13,7 @@ import {filterItems} from './mock/filter.js';
 import {menuItems} from './mock/site-menu.js';
 import {render, RenderPosition} from './utils.js';
 
-const EVENT_COUNT = 0;
+const EVENT_COUNT = 4;
 
 
 const renderEvent = (tripEventsElement, event) => {
