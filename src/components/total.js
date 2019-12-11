@@ -1,4 +1,4 @@
-import {createElement} from '../utils.js';
+import AbstractComponent from './abstract-class.js';
 
 const createRouteTemplate = (events) => {
   let total = 0;
@@ -19,25 +19,13 @@ const createRouteTemplate = (events) => {
 };
 
 
-export default class Route {
+export default class Route extends AbstractComponent {
   constructor(events) {
+    super();
     this._events = events;
-    this._element = null;
   }
 
   getTemplate() {
     return createRouteTemplate(this._events);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

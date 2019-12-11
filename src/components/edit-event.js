@@ -1,5 +1,6 @@
 import {eventTypeTransfer, eventTypeActivity, cityList} from '../constants.js';
-import {formatTime, createElement} from '../utils.js';
+import {formatTime} from '../utils/common.js';
+import AbstractComponent from './abstract-class.js';
 
 const textCapitalize = (text) => {
   return text[0].toUpperCase() + text.slice(1);
@@ -147,25 +148,17 @@ const createEventEditTemplate = (event) => {
   );
 };
 
-export default class DayList {
+export default class DayList extends AbstractComponent {
   constructor(event) {
+    super();
     this._event = event;
-    this._element = null;
   }
 
   getTemplate() {
     return createEventEditTemplate(this._event);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+  setSubmitHandler(handler) {
+    this.getElement().addEventListener(`submit`, handler);
   }
 }

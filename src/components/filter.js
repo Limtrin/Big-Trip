@@ -1,4 +1,4 @@
-import {createElement} from '../utils.js';
+import AbstractComponent from "./abstract-class";
 
 const textCapitalize = (text) => {
   return text[0].toUpperCase() + text.slice(1);
@@ -29,25 +29,13 @@ const createFilterTemplate = (filterItems) => {
   );
 };
 
-export default class Filter {
+export default class Filter extends AbstractComponent {
   constructor(filters) {
+    super();
     this._filters = filters;
-    this._element = null;
   }
 
   getTemplate() {
     return createFilterTemplate(this._filters);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
