@@ -8,7 +8,7 @@ import {menuItems} from './mock/site-menu.js';
 import {render, RenderPosition} from './utils/render.js';
 import TripController from './controllers/trip.js';
 
-const EVENT_COUNT = 4;
+const EVENT_COUNT = 5;
 
 
 const events = generateEventList(EVENT_COUNT);
@@ -25,5 +25,5 @@ render(siteControlsElement.lastElementChild, new FilterComponent(filterItems), R
 
 const siteMainElement = document.querySelector(`.trip-events`);
 
-const tripController = new TripController(siteMainElement);
+const tripController = new TripController(siteMainElement, events);
 tripController.render(events);
