@@ -77,7 +77,7 @@ const getRandomOffers = (offers) => {
 const generateEvent = () => {
 
   const dateBegining = getRandomDate();
-  const dateEnding = new Date(Date.parse(dateBegining) + 60 * 1000 * 90);
+  const dateEnding = new Date(Date.parse(dateBegining) + 60 * 1000 * Math.floor(Math.random() * 90));
 
   return {
     type: getRandomItemFromArray(eventType),

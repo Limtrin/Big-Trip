@@ -1,26 +1,32 @@
 import AbstractComponent from './abstract-class.js';
 
-const createTripDayListTemplate = (date) => {
-  return (
-    `<li class="trip-days__item  day">
+const createTripDayListTemplate = (date = 0, count = 0) => {
+  const dateCount = date === 0 && count === 0 ? `<li class="trip-days__item  day">
+  <div class="day__info">
+  </div>
+
+  <ul class="trip-events__list">
+  </ul>
+</li>` : `<li class="trip-days__item  day">
       <div class="day__info">
-        <span class="day__counter">1</span>
+        <span class="day__counter">${count}</span>
         <time class="day__date" datetime="${date.getFullYear()}-${date.getMonth() + 1}-${date.getDay()}">${date.toLocaleDateString(`en-US`, {month: `short`})} ${date.getDay()}</time>
       </div>
 
       <ul class="trip-events__list">
       </ul>
-    </li>`
-  );
+    </li>`;
+  return dateCount;
 };
 
 export default class DayList extends AbstractComponent {
-  constructor(date) {
+  constructor(date, count) {
     super();
     this._date = date;
+    this._count = count;
   }
 
   getTemplate() {
-    return createTripDayListTemplate(this._date);
+    return createTripDayListTemplate(this._date, this._count);
   }
 }
