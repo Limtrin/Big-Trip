@@ -1,5 +1,6 @@
 import {eventTypeTransfer} from '../constants.js';
-import {formatTimeDifference, formatTimeEvent, createElement} from '../utils.js';
+import {formatTimeDifference, formatTimeEvent} from '../utils/common.js';
+import AbstractComponent from './abstract-class.js';
 
 const textCapitalize = (text) => {
   return text[0].toUpperCase() + text.slice(1);
@@ -67,25 +68,18 @@ const createItemTemplate = (event) => {
   );
 };
 
-export default class Event {
+export default class Event extends AbstractComponent {
   constructor(date) {
+    super();
     this._date = date;
-    this._element = null;
   }
 
   getTemplate() {
     return createItemTemplate(this._date);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+  setEditButtonClickHandler(handler) {
+    this.getElement().querySelector(`.event__rollup-btn`)
+      .addEventListener(`click`, handler);
   }
 }
