@@ -63,7 +63,11 @@ const generateDescription = (description) => {
 };
 
 const getRandomDate = () => {
-  const targetDate = new Date(2019, 10, 19, Math.floor(Math.random() * 23), Math.floor(Math.random() * 60));
+  const targetDate = new Date();
+  const sign = Math.random() > 0.5 ? 1 : -1;
+  const diffValue = sign * Math.floor(Math.random() * 7);
+
+  targetDate.setDate(targetDate.getDate() + diffValue);
 
   return targetDate;
 };
@@ -87,7 +91,8 @@ const generateEvent = () => {
     dateBegining,
     dateEnding,
     price: Math.floor(Math.random() * 100),
-    offers: getRandomOffers(offersList)
+    offers: getRandomOffers(offersList),
+    isFavorite: Math.random() > 0.5
   };
 };
 

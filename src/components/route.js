@@ -13,7 +13,7 @@ const createRouteTemplate = (events) => {
 
   const renderTemplate = events === 0 ? `` : `<div class="trip-info__main">
                                                 <h1 class="trip-info__title">${cityArray[0]} &mdash; ... &mdash; ${cityArray[cityArray.length - 1]}</h1>
-                                                <p class="trip-info__dates">${eventsDate[0].toLocaleDateString(`en-US`, {month: `short`})} ${eventsDate[0].getDay()}&nbsp;&mdash;&nbsp;${eventsDate[eventsDate.length - 1].getDay()}</p>
+                                                <p class="trip-info__dates">${eventsDate[0].toLocaleDateString(`en-US`, {month: `short`})} ${eventsDate[0].getDate()}&nbsp;&mdash;&nbsp;${eventsDate[eventsDate.length - 1].getDate()}</p>
                                               </div>`;
 
   return renderTemplate;

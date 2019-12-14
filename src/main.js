@@ -12,7 +12,6 @@ const EVENT_COUNT = 5;
 
 
 const events = generateEventList(EVENT_COUNT);
-events.sort((a, b) => a.dateBegining - b.dateBegining);
 
 const siteRouteElement = document.querySelector(`.trip-main__trip-info`);
 render(siteRouteElement, new TotalComponent(events), RenderPosition.BEFOREEND);
