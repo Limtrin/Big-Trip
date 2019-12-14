@@ -1,6 +1,6 @@
-import {eventTypeTransfer, eventTypeActivity, cityList} from '../constants.js';
+import {eventTypeTransfer, eventTypeActivity, cityList, offersList} from '../constants.js';
 import {formatTime} from '../utils/common.js';
-import AbstractComponent from './abstract-class.js';
+import AbstractSmartComponent from './abstract-smart-component.js';
 
 const textCapitalize = (text) => {
   return text[0].toUpperCase() + text.slice(1);
@@ -23,7 +23,7 @@ const createCityListMarkup = (cities) => {
   return cities
   .map((city) => {
     return (
-      `<option value="${city}"></option>`
+      `<option value="${city.name}"></option>`
     );
   })
   .join(`\n`);
@@ -44,7 +44,7 @@ const createOfferListMarkup = (offers) => {
     .map((offer) => {
       return (
         `<div class="event__offer-selector">
-          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.name}-1" type="checkbox" name="event-offer-${offer.name}">
+          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.name}-1" type="checkbox" name="event-offer-${offer.name}" ${offer.isChosen ? `checked` : ``}>
           <label class="event__offer-label" for="event-offer-${offer.name}-1">
             <span class="event__offer-title">${offer.desc}</span>
             &plus;
@@ -56,19 +56,21 @@ const createOfferListMarkup = (offers) => {
     .join(`\n`);
 };
 
-const createEventEditTemplate = (event) => {
+const createEventEditTemplate = (event, options = {}) => {
 
-  const {type, city, photos, description, dateBegining, dateEnding, price, offers, isFavorite} = event;
+  const {dateBegining, dateEnding, price, isFavorite} = event;
+
+  const {type, offers, city} = options;
 
   const typePlaceholder = eventTypeTransfer.includes(type) ? `${textCapitalize(type)} to` : `${textCapitalize(type)} in`;
 
   const typeTransferMarkup = createTypeListMarkup(eventTypeTransfer, type);
   const typeActivityMarkup = createTypeListMarkup(eventTypeActivity, type);
-  const photoesMarkup = createPhotoListMarkup(photos);
+  const photoesMarkup = createPhotoListMarkup(city.pictures);
   const offersMarkup = createOfferListMarkup(offers);
 
   return (
-    `<form class="trip-events__item  event  event--edit" action="#" method="post">
+    `<form class="trip-events__item  event  event--edit" method="get">
       <header class="event__header">
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -94,7 +96,7 @@ const createEventEditTemplate = (event) => {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${typePlaceholder}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city.name}" list="destination-list-1">
           <datalist id="destination-list-1">
             ${createCityListMarkup(cityList)}
           </datalist>
@@ -147,7 +149,7 @@ const createEventEditTemplate = (event) => {
 
         <section class="event__section  event__section--destination">
           <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${description}</p>
+          <p class="event__destination-description">${city.description}</p>
 
           <div class="event__photos-container">
             <div class="event__photos-tape">
@@ -160,14 +162,24 @@ const createEventEditTemplate = (event) => {
   );
 };
 
-export default class DayList extends AbstractComponent {
+export default class DayList extends AbstractSmartComponent {
   constructor(event) {
     super();
     this._event = event;
+
+    this._type = event.type;
+    this._offers = event.offers;
+    this._city = event.city;
+
+    this._subscribeOnEvents();
   }
 
   getTemplate() {
-    return createEventEditTemplate(this._event);
+    return createEventEditTemplate(this._event, {
+      type: this._type,
+      offers: this._offers,
+      city: this._city
+    });
   }
 
   setSubmitHandler(handler) {
@@ -177,5 +189,39 @@ export default class DayList extends AbstractComponent {
   setFavoritesButtonClickHandler(handler) {
     this.getElement().querySelector(`.event__favorite-btn`)
       .addEventListener(`click`, handler);
+  }
+
+  recoveryListeners() {
+    this._subscribeOnEvents();
+  }
+
+  reset() {
+    const event = this._event;
+
+    this._type = event.type;
+    this._offers = event.offers;
+    this._city = event.city;
+
+    this.rerender();
+  }
+
+  _subscribeOnEvents() {
+    const element = this.getElement();
+
+    const eventsList = element.querySelector(`.event__type-list`);
+    if (eventsList) {
+      eventsList.addEventListener(`change`, (evt) => {
+        this._type = evt.target.value;
+        this._offers = offersList.filter((it) => it.type === this._type);
+
+        this.rerender();
+      });
+    }
+
+    element.querySelector(`.event__input`).addEventListener(`change`, (evt) => {
+      this._city = cityList.find((it) => it.name === evt.target.value);
+
+      this.rerender();
+    });
   }
 }

@@ -2,13 +2,21 @@ import {render, RenderPosition, replace} from '../utils/render.js';
 import EventComponent from '../components/event.js';
 import EventEditComponent from '../components/edit-event.js';
 
+const Mode = {
+  DEFAULT: `default`,
+  EDIT: `edit`,
+};
+
 export default class PointController {
-  constructor(container, onDataChange) {
+  constructor(container, onDataChange, onViewChange) {
     this._container = container;
     this._eventComponent = null;
     this._eventEditComponent = null;
 
+    this._mode = Mode.DEFAULT;
+
     this._onDataChange = onDataChange;
+    this._onViewChange = onViewChange;
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
   }
 
@@ -42,11 +50,16 @@ export default class PointController {
   }
 
   _replaceEditToEvent() {
+    this._eventEditComponent.reset();
+
     replace(this._eventComponent, this._eventEditComponent);
+    this._mode = Mode.DEFAULT;
   }
 
   _replaceEventToEdit() {
+    this._onViewChange();
     replace(this._eventEditComponent, this._eventComponent);
+    this._mode = Mode.EDIT;
   }
 
   _onEscKeyDown(evt) {
@@ -55,6 +68,12 @@ export default class PointController {
     if (isEscKey) {
       this._replaceEditToEvent();
       document.removeEventListener(`keydown`, this._onEscKeyDown);
+    }
+  }
+
+  setDefaultView() {
+    if (this._mode !== Mode.DEFAULT) {
+      this._replaceEditToEvent();
     }
   }
 }

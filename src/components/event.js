@@ -9,13 +9,11 @@ const textCapitalize = (text) => {
 const createOfferListMarkup = (offers) => {
   return offers
     .map((offer) => {
-      return (
-        `<li class="event__offer">
+      return offer.isChosen ? `<li class="event__offer">
           <span class="event__offer-title">${offer.desc}</span>
           &plus;
           &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
-        </li>`
-      );
+        </li>` : ``;
     })
     .join(`\n`);
 };
@@ -28,7 +26,7 @@ const createItemTemplate = (event) => {
 
   const {type, city, dateBegining, dateEnding, price, offers} = event;
 
-  const typePlaceholder = eventTypeTransfer.includes(type) ? `${textCapitalize(type)} to ${city}` : `${textCapitalize(type)} in ${city}`;
+  const typePlaceholder = eventTypeTransfer.includes(type) ? `${textCapitalize(type)} to ${city.name}` : `${textCapitalize(type)} in ${city.name}`;
 
   const createOffersMarkup = createOfferListMarkup(offers);
 

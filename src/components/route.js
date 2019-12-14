@@ -5,9 +5,9 @@ const createRouteTemplate = (events) => {
   let cityArray = [];
   let eventsDate = [];
 
-  events.map((event) => {
+  events.sort((a, b) => a.dateBegining - b.dateBegining).map((event) => {
     const {city, dateBegining} = event;
-    cityArray.push(city);
+    cityArray.push(city.name);
     eventsDate.push(dateBegining);
   });
 

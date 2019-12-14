@@ -7,7 +7,9 @@ const createRouteTemplate = (events) => {
     const {price, offers} = event;
     total += price;
     offers.map((offer) => {
-      total += offer.price;
+      if (offer.isChosen) {
+        total += offer.price;
+      }
     });
   });
 
