@@ -1,26 +1,24 @@
-const castTimeFormat = (value) => {
-  return value < 10 ? `0${value}` : String(value);
-};
+import moment from 'moment';
 
 export const formatTime = (date) => {
-  const hours = castTimeFormat(date.getHours());
-  const minutes = castTimeFormat(date.getMinutes());
-  const month = castTimeFormat(date.getMonth() + 1);
-  const year = castTimeFormat(date.getFullYear()).slice(2);
-  const day = castTimeFormat(date.getDay() + 1);
-
-  return `${day}/${month}/${year} ${hours}:${minutes}`;
-};
-
-export const formatTimeDifference = (date) => {
-  let minutes = Math.round(date / 1000 / 60);
-  const hours = Math.floor(minutes / 60);
-  minutes -= hours * 60;
-  return (`${hours}H ${minutes}M`);
+  return moment(date).format(`DD/MM/YYYY HH:mm`);
 };
 
 export const formatTimeEvent = (date) => {
-  const hours = castTimeFormat(date.getHours());
-  const minutes = castTimeFormat(date.getMinutes());
-  return `${hours} : ${minutes}`;
+  return moment(date).format(`HH : mm`);
+};
+
+export const createDateDifference = (startDate, endDate) => {
+  const b = moment(startDate);
+  const a = moment(endDate);
+
+  const days = a.diff(b, `days`);
+  b.add(days, `days`);
+
+  const hours = a.diff(b, `hours`);
+  b.add(hours, `hours`);
+
+  const minutes = a.diff(b, `minutes`);
+
+  return (`${days ? `${days}D` : ``} ${hours ? `${hours}H` : ``} ${minutes ? `${minutes + 1}M` : ``}`);
 };

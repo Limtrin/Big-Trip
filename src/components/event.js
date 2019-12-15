@@ -1,5 +1,5 @@
 import {eventTypeTransfer} from '../constants.js';
-import {formatTimeDifference, formatTimeEvent} from '../utils/common.js';
+import {formatTimeEvent, createDateDifference} from '../utils/common.js';
 import AbstractComponent from './abstract-class.js';
 
 const textCapitalize = (text) => {
@@ -18,10 +18,6 @@ const createOfferListMarkup = (offers) => {
     .join(`\n`);
 };
 
-const createDateDifference = (startDate, endDate) => {
-  return endDate.getTime() - startDate.getTime();
-};
-
 const createItemTemplate = (event) => {
 
   const {type, city, dateBegining, dateEnding, price, offers} = event;
@@ -29,8 +25,6 @@ const createItemTemplate = (event) => {
   const typePlaceholder = eventTypeTransfer.includes(type) ? `${textCapitalize(type)} to ${city.name}` : `${textCapitalize(type)} in ${city.name}`;
 
   const createOffersMarkup = createOfferListMarkup(offers);
-
-  const createDifferenceMarkup = createDateDifference(dateBegining, dateEnding);
 
   return (
     `<li class="trip-events__item">
@@ -46,7 +40,7 @@ const createItemTemplate = (event) => {
             &mdash;
             <time class="event__end-time" datetime="${dateEnding.toISOString()}">${formatTimeEvent(dateEnding)}</time>
           </p>
-          <p class="event__duration">${formatTimeDifference(createDifferenceMarkup)}</p>
+          <p class="event__duration">${createDateDifference(dateBegining, dateEnding)}</p>
         </div>
 
         <p class="event__price">

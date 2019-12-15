@@ -1,5 +1,7 @@
 import {eventTypeTransfer, eventTypeActivity, cityList, offersList} from '../constants.js';
 import {formatTime} from '../utils/common.js';
+import flatpickr from 'flatpickr';
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 import AbstractSmartComponent from './abstract-smart-component.js';
 
 const textCapitalize = (text) => {
@@ -170,7 +172,9 @@ export default class DayList extends AbstractSmartComponent {
     this._type = event.type;
     this._offers = event.offers;
     this._city = event.city;
+    this._flatpickr = null;
 
+    this._applyFlatpickr();
     this._subscribeOnEvents();
   }
 
@@ -179,6 +183,30 @@ export default class DayList extends AbstractSmartComponent {
       type: this._type,
       offers: this._offers,
       city: this._city
+    });
+  }
+
+  _applyFlatpickr() {
+    if (this._flatpickr) {
+      this._flatpickr.destroy();
+      this._flatpickr = null;
+    }
+
+    const dateBeginingElement = this.getElement().querySelector(`#event-start-time-1`);
+    this._flatpickr = flatpickr(dateBeginingElement, {
+      allowInput: true,
+      enableTime: true,
+      dateFormat: `d/m/Y H:i`,
+      defaultDate: this._event.dateBegining
+    });
+
+    const dateEndingElement = this.getElement().querySelector(`#event-end-time-1`);
+    this._flatpickr = flatpickr(dateEndingElement, {
+      allowInput: true,
+      enableTime: true,
+      dateFormat: `d/m/Y H:i`,
+      minDate: this._event.dateBegining,
+      defaultDate: this._event.dateEnding
     });
   }
 
