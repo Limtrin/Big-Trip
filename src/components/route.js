@@ -5,15 +5,15 @@ const createRouteTemplate = (events) => {
   let cityArray = [];
   let eventsDate = [];
 
-  events.map((event) => {
+  events.sort((a, b) => a.dateBegining - b.dateBegining).map((event) => {
     const {city, dateBegining} = event;
-    cityArray.push(city);
+    cityArray.push(city.name);
     eventsDate.push(dateBegining);
   });
 
   const renderTemplate = events === 0 ? `` : `<div class="trip-info__main">
                                                 <h1 class="trip-info__title">${cityArray[0]} &mdash; ... &mdash; ${cityArray[cityArray.length - 1]}</h1>
-                                                <p class="trip-info__dates">${eventsDate[0].toLocaleDateString(`en-US`, {month: `short`})} ${eventsDate[0].getDay()}&nbsp;&mdash;&nbsp;${eventsDate[eventsDate.length - 1].getDay()}</p>
+                                                <p class="trip-info__dates">${eventsDate[0].toLocaleDateString(`en-US`, {month: `short`})} ${eventsDate[0].getDate()}&nbsp;&mdash;&nbsp;${eventsDate[eventsDate.length - 1].getDate()}</p>
                                               </div>`;
 
   return renderTemplate;

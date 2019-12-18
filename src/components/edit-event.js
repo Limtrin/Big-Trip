@@ -1,6 +1,8 @@
-import {eventTypeTransfer, eventTypeActivity, cityList} from '../constants.js';
+import {eventTypeTransfer, eventTypeActivity, cityList, offersList} from '../constants.js';
 import {formatTime} from '../utils/common.js';
-import AbstractComponent from './abstract-class.js';
+import flatpickr from 'flatpickr';
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
+import AbstractSmartComponent from './abstract-smart-component.js';
 
 const textCapitalize = (text) => {
   return text[0].toUpperCase() + text.slice(1);
@@ -23,7 +25,7 @@ const createCityListMarkup = (cities) => {
   return cities
   .map((city) => {
     return (
-      `<option value="${city}"></option>`
+      `<option value="${city.name}"></option>`
     );
   })
   .join(`\n`);
@@ -44,7 +46,7 @@ const createOfferListMarkup = (offers) => {
     .map((offer) => {
       return (
         `<div class="event__offer-selector">
-          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.name}-1" type="checkbox" name="event-offer-${offer.name}">
+          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.name}-1" type="checkbox" name="event-offer-${offer.name}" ${offer.isChosen ? `checked` : ``}>
           <label class="event__offer-label" for="event-offer-${offer.name}-1">
             <span class="event__offer-title">${offer.desc}</span>
             &plus;
@@ -56,19 +58,21 @@ const createOfferListMarkup = (offers) => {
     .join(`\n`);
 };
 
-const createEventEditTemplate = (event) => {
+const createEventEditTemplate = (event, options = {}) => {
 
-  const {type, city, photos, description, dateBegining, dateEnding, price, offers} = event;
+  const {dateBegining, dateEnding, price, isFavorite} = event;
+
+  const {type, offers, city} = options;
 
   const typePlaceholder = eventTypeTransfer.includes(type) ? `${textCapitalize(type)} to` : `${textCapitalize(type)} in`;
 
   const typeTransferMarkup = createTypeListMarkup(eventTypeTransfer, type);
   const typeActivityMarkup = createTypeListMarkup(eventTypeActivity, type);
-  const photoesMarkup = createPhotoListMarkup(photos);
+  const photoesMarkup = createPhotoListMarkup(city.pictures);
   const offersMarkup = createOfferListMarkup(offers);
 
   return (
-    `<form class="trip-events__item  event  event--edit" action="#" method="post">
+    `<form class="trip-events__item  event  event--edit" method="get">
       <header class="event__header">
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
@@ -94,7 +98,7 @@ const createEventEditTemplate = (event) => {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${typePlaceholder}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city.name}" list="destination-list-1">
           <datalist id="destination-list-1">
             ${createCityListMarkup(cityList)}
           </datalist>
@@ -121,7 +125,19 @@ const createEventEditTemplate = (event) => {
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__reset-btn" type="reset">Delete</button>
+
+        <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
+        <label class="event__favorite-btn" for="event-favorite-1">
+          <span class="visually-hidden">Add to favorite</span>
+          <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
+            <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"></path>
+          </svg>
+        </label>
+
+        <button class="event__rollup-btn" type="button">
+          <span class="visually-hidden">Open event</span>
+        </button>
       </header>
       <section class="event__details">
 
@@ -135,7 +151,7 @@ const createEventEditTemplate = (event) => {
 
         <section class="event__section  event__section--destination">
           <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${description}</p>
+          <p class="event__destination-description">${city.description}</p>
 
           <div class="event__photos-container">
             <div class="event__photos-tape">
@@ -148,17 +164,92 @@ const createEventEditTemplate = (event) => {
   );
 };
 
-export default class DayList extends AbstractComponent {
+export default class DayList extends AbstractSmartComponent {
   constructor(event) {
     super();
     this._event = event;
+
+    this._type = event.type;
+    this._offers = event.offers;
+    this._city = event.city;
+    this._flatpickr = null;
+
+    this._applyFlatpickr();
+    this._subscribeOnEvents();
   }
 
   getTemplate() {
-    return createEventEditTemplate(this._event);
+    return createEventEditTemplate(this._event, {
+      type: this._type,
+      offers: this._offers,
+      city: this._city
+    });
+  }
+
+  _applyFlatpickr() {
+    if (this._flatpickr) {
+      this._flatpickr.destroy();
+      this._flatpickr = null;
+    }
+
+    const dateBeginingElement = this.getElement().querySelector(`#event-start-time-1`);
+    this._flatpickr = flatpickr(dateBeginingElement, {
+      allowInput: true,
+      enableTime: true,
+      dateFormat: `d/m/Y H:i`,
+      defaultDate: this._event.dateBegining
+    });
+
+    const dateEndingElement = this.getElement().querySelector(`#event-end-time-1`);
+    this._flatpickr = flatpickr(dateEndingElement, {
+      allowInput: true,
+      enableTime: true,
+      dateFormat: `d/m/Y H:i`,
+      minDate: this._event.dateBegining,
+      defaultDate: this._event.dateEnding
+    });
   }
 
   setSubmitHandler(handler) {
     this.getElement().addEventListener(`submit`, handler);
+  }
+
+  setFavoritesButtonClickHandler(handler) {
+    this.getElement().querySelector(`.event__favorite-btn`)
+      .addEventListener(`click`, handler);
+  }
+
+  recoveryListeners() {
+    this._subscribeOnEvents();
+  }
+
+  reset() {
+    const event = this._event;
+
+    this._type = event.type;
+    this._offers = event.offers;
+    this._city = event.city;
+
+    this.rerender();
+  }
+
+  _subscribeOnEvents() {
+    const element = this.getElement();
+
+    const eventsList = element.querySelector(`.event__type-list`);
+    if (eventsList) {
+      eventsList.addEventListener(`change`, (evt) => {
+        this._type = evt.target.value;
+        this._offers = offersList.filter((it) => it.type === this._type);
+
+        this.rerender();
+      });
+    }
+
+    element.querySelector(`.event__input`).addEventListener(`change`, (evt) => {
+      this._city = cityList.find((it) => it.name === evt.target.value);
+
+      this.rerender();
+    });
   }
 }
