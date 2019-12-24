@@ -31,13 +31,15 @@ const generateEvent = () => {
 
 
   return {
+    id: String(new Date() + Math.random()),
     type: typeEvent,
     city: getRandomItemFromArray(cityList),
     dateBegining,
     dateEnding,
     price: Math.floor(Math.random() * 100),
     offers: typeOffers,
-    isFavorite: Math.random() > 0.5
+    isFavorite: Math.random() > 0.5,
+    isNew: false
   };
 };
 

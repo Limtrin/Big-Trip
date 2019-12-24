@@ -1,5 +1,5 @@
-export const filterItems = [
-  `everithing`,
-  `future`,
-  `past`
-];
+export const filterItems = {
+  EVERITHING: `everithing`,
+  FUTURE: `future`,
+  PAST: `past`
+};
