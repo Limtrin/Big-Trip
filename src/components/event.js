@@ -3,7 +3,11 @@ import {formatTimeEvent, createDateDifference} from '../utils/common.js';
 import AbstractComponent from './abstract-class.js';
 
 const textCapitalize = (text) => {
-  return text[0].toUpperCase() + text.slice(1);
+  if (text) {
+    return text[0].toUpperCase() + text.slice(1);
+  } else {
+    return ``;
+  }
 };
 
 const createOfferListMarkup = (offers) => {
@@ -22,9 +26,9 @@ const createItemTemplate = (event) => {
 
   const {type, city, dateBegining, dateEnding, price, offers} = event;
 
-  const typePlaceholder = eventTypeTransfer.includes(type) ? `${textCapitalize(type)} to ${city.name}` : `${textCapitalize(type)} in ${city.name}`;
+  const typePlaceholder = eventTypeTransfer.includes(type) ? `${textCapitalize(type)} to ${city ? city.name : ``}` : `${textCapitalize(type)} in ${city ? city.name : ``}`;
 
-  const createOffersMarkup = createOfferListMarkup(offers);
+  const createOffersMarkup = offers ? createOfferListMarkup(offers) : ``;
 
   return (
     `<li class="trip-events__item">
@@ -36,9 +40,9 @@ const createItemTemplate = (event) => {
 
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="${dateBegining.toISOString()}">${formatTimeEvent(dateBegining)}</time>
+            <time class="event__start-time" datetime="">${formatTimeEvent(dateBegining)}</time>
             &mdash;
-            <time class="event__end-time" datetime="${dateEnding.toISOString()}">${formatTimeEvent(dateEnding)}</time>
+            <time class="event__end-time" datetime="">${formatTimeEvent(dateEnding)}</time>
           </p>
           <p class="event__duration">${createDateDifference(dateBegining, dateEnding)}</p>
         </div>
