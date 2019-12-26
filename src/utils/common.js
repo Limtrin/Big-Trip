@@ -8,7 +8,7 @@ export const formatTimeEvent = (date) => {
   return moment(date).format(`HH : mm`);
 };
 
-export const createDateDifference = (startDate, endDate) => {
+export const findDateDifference = (startDate, endDate) => {
   const b = moment(startDate);
   const a = moment(endDate);
 
@@ -20,5 +20,15 @@ export const createDateDifference = (startDate, endDate) => {
 
   const minutes = a.diff(b, `minutes`);
 
-  return (`${days ? `${days}D` : ``} ${hours ? `${hours}H` : ``} ${minutes ? `${minutes + 1}M` : ``}`);
+  return [days, hours, minutes + 1];
+};
+
+export const formatDifference = (array) => {
+  const [days, hours, minutes] = array;
+  return (`${days ? `${days}D` : ``} ${hours ? `${hours}H` : ``} ${minutes ? `${minutes}M` : ``}`);
+};
+
+export const createDateDifference = (startDate, endDate) => {
+  const difference = findDateDifference(startDate, endDate);
+  return formatDifference(difference);
 };
