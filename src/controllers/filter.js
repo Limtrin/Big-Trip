@@ -38,4 +38,12 @@ export default class FilterController {
     this._activeFilterType = filterType;
     this.render();
   }
+
+  hide() {
+    this._filterComponent.hide();
+  }
+
+  show() {
+    this._filterComponent.show();
+  }
 }

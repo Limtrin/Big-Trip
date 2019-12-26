@@ -6,6 +6,7 @@ import SortComponent, {SortType} from '../components/sort.js';
 import DayListComponent from '../components/day-list.js';
 import {Mode as TaskControllerMode, EmptyEvent} from './point.js';
 
+const HIDDEN_CLASS = `visually-hidden`;
 
 // Метод рендеринга главной страницы
 const renderEvents = (eventsList, tripDaysElement, onDataChange, onViewChange, onFavoriteButtonChange) => {
@@ -191,5 +192,13 @@ export default class TripController {
 
   _onFilterChange() {
     this._updateEvents();
+  }
+
+  hide() {
+    this._container.classList.add(HIDDEN_CLASS);
+  }
+
+  show() {
+    this._container.classList.remove(HIDDEN_CLASS);
   }
 }
