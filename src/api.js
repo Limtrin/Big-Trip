@@ -37,9 +37,6 @@ const API = class {
       .then((response) => response.json());
   }
 
-  createTask(task) {
-  }
-
   updateEvent(id, data) {
     return this._load({
       url: `points/${id}`,
@@ -49,9 +46,6 @@ const API = class {
     })
       .then((response) => response.json())
       .then(Event.parseEvent);
-  }
-
-  deleteTask(id) {
   }
 
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {
