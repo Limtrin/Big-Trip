@@ -9,7 +9,7 @@ import {Mode as TaskControllerMode, EmptyEvent} from './point.js';
 const HIDDEN_CLASS = `visually-hidden`;
 
 // Метод рендеринга главной страницы
-const renderEvents = (eventsList, tripDaysElement, onDataChange, onViewChange, onFavoriteButtonChange) => {
+const renderEvents = (eventsList, tripDaysElement, onDataChange, onViewChange, onFavoriteButtonChange, destinations, offers) => {
 
   let tripEventsElement;
   let currentDate = new Date();
@@ -19,7 +19,7 @@ const renderEvents = (eventsList, tripDaysElement, onDataChange, onViewChange, o
     .map(
         (event) => {
           if (currentDate.getDate() === event.dateBegining.getDate() && tripEventsElement) { // Если даты совпадают и контейнер определён - просто добавляем элемент
-            const pointController = new PointController(tripEventsElement, onDataChange, onViewChange, onFavoriteButtonChange);
+            const pointController = new PointController(tripEventsElement, onDataChange, onViewChange, onFavoriteButtonChange, destinations, offers);
             pointController.render(event, TaskControllerMode.DEFAULT);
             return pointController;
           } else {
@@ -27,7 +27,7 @@ const renderEvents = (eventsList, tripDaysElement, onDataChange, onViewChange, o
             render(tripDaysElement, listComponent, RenderPosition.BEFOREEND);
             tripEventsElement = listComponent.getElement().querySelector(`.trip-events__list`);
 
-            const pointController = new PointController(tripEventsElement, onDataChange, onViewChange, onFavoriteButtonChange);
+            const pointController = new PointController(tripEventsElement, onDataChange, onViewChange, onFavoriteButtonChange, destinations, offers);
             pointController.render(event, TaskControllerMode.DEFAULT);
 
             currentDate = event.dateBegining;
@@ -40,7 +40,7 @@ const renderEvents = (eventsList, tripDaysElement, onDataChange, onViewChange, o
 };
 
 // Метод рендеринга страниц сортировки. Отличие в едином контейнере, который в свою очередь не выводит никакую инфрмацию о дате, он пустой, в компонент ничего не передали
-const renderSortedEvents = (eventsList, tripDaysElement, onDataChange, onViewChange, onFavoriteButtonChange) => {
+const renderSortedEvents = (eventsList, tripDaysElement, onDataChange, onViewChange, onFavoriteButtonChange, destinations, offers) => {
   const listComponent = new DayListComponent();
   render(tripDaysElement, listComponent, RenderPosition.BEFOREEND);
   const tripEventsElement = listComponent.getElement().querySelector(`.trip-events__list`);
@@ -48,7 +48,7 @@ const renderSortedEvents = (eventsList, tripDaysElement, onDataChange, onViewCha
   return eventsList
     .map(
         (event) => {
-          const pointController = new PointController(tripEventsElement, onDataChange, onViewChange, onFavoriteButtonChange);
+          const pointController = new PointController(tripEventsElement, onDataChange, onViewChange, onFavoriteButtonChange, destinations, offers);
           pointController.render(event, TaskControllerMode.DEFAULT);
           return pointController;
         }
@@ -57,10 +57,13 @@ const renderSortedEvents = (eventsList, tripDaysElement, onDataChange, onViewCha
 
 
 export default class TripController {
-  constructor(container, eventsModel) {
+  constructor(container, eventsModel, destinationsModel, offersModel, api) {
     this._container = container;
     this._eventsModel = eventsModel;
+    this._destinationsModel = destinationsModel;
+    this._offersModel = offersModel;
     this._sortMode = SortType.DEFAULT;
+    this._api = api;
 
     this._sortComponent = new SortComponent();
     this._boardComponent = new BoardComponent();
@@ -89,7 +92,7 @@ export default class TripController {
 
     const tripDaysElement = this._container.querySelector(`.trip-days`);
 
-    this._eventsList = renderEvents(events, tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange);
+    this._eventsList = renderEvents(events, tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
   }
 
   createEvent() {
@@ -98,7 +101,7 @@ export default class TripController {
     }
     this._onViewChange();
     const tripDaysElement = this._container.querySelector(`.trip-days`);
-    this._creatingEvent = new PointController(tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange);
+    this._creatingEvent = new PointController(tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
     this._creatingEvent.render(EmptyEvent, TaskControllerMode.ADDING);
     this._eventsList.unshift(this._creatingEvent);
   }
@@ -120,12 +123,12 @@ export default class TripController {
 
   _renderEvents(events = this._eventsModel.getEvents()) {
     const tripDaysElement = this._container.querySelector(`.trip-days`);
-    this._eventsList = renderEvents(events, tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange);
+    this._eventsList = renderEvents(events, tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
   }
 
   _renderSortedEvents(events = this._eventsModel.getEvents()) {
     const tripDaysElement = this._container.querySelector(`.trip-days`);
-    this._eventsList = renderSortedEvents(events, tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange);
+    this._eventsList = renderSortedEvents(events, tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
   }
 
   _onSortTypeChange(sortType) {
@@ -172,17 +175,22 @@ export default class TripController {
       this._eventsModel.removeEvent(oldData.id);
       this._updateEvents();
     } else {
-      const isSuccess = this._eventsModel.updateEvent(oldData.id, newData);
-
-      if (isSuccess) {
-        this._updateEvents();
-      }
+      this._api.updateEvent(oldData.id, newData)
+        .then((eventModel) => {
+          const isSuccess = this._eventsModel.updateEvent(oldData.id, eventModel);
+          if (isSuccess) {
+            this._updateEvents();
+          }
+        });
     }
   }
 
   _onFavoriteButtonChange(pointController, oldData, newData) {
-    this._eventsModel.updateEvent(oldData.id, newData);
-    pointController.render(newData, TaskControllerMode.DEFAULT);
+    this._api.updateEvent(oldData.id, newData)
+      .then((eventModel) => {
+        this._eventsModel.updateEvent(oldData.id, eventModel);
+        pointController.render(eventModel, TaskControllerMode.DEFAULT);
+      });
   }
 
   _onViewChange() {

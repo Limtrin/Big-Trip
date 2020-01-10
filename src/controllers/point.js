@@ -1,7 +1,8 @@
 import {render, remove, RenderPosition, replace} from '../utils/render.js';
 import EventComponent from '../components/event.js';
 import EventEditComponent from '../components/edit-event.js';
-import {offersList} from '../constants.js';
+import EventModel from '../models/event.js';
+import moment from 'moment';
 
 export const Mode = {
   ADDING: `adding`,
@@ -15,19 +16,51 @@ export const EmptyEvent = {
   dateBegining: new Date(),
   dateEnding: new Date(),
   price: 0,
-  offers: offersList.slice().map((it) => {
-    return Object.assign({}, it);
-  }).filter((it) => it.type === `flight`),
+  offers: [],
   isFavorite: false,
   isNew: true
 };
 
 
+const parseFormData = (formData, destinationsList, offersList) => {
+
+  const typeCity = JSON.parse(JSON.stringify(destinationsList)).filter((it) => it.name === formData.get(`event-destination`))[0];
+
+  const changedOffers = JSON.parse(JSON.stringify(offersList)).filter((it) => it.type === formData.get(`event-type`));
+
+  const chosenOffers = [];
+
+  changedOffers[0].offers.forEach((it) => {
+    chosenOffers.push(formData.get(`event-offer-${it.title}`));
+  });
+
+  changedOffers[0].offers.forEach((it, index) => {
+    if (chosenOffers[index]) {
+      it.isChosen = true;
+    } else {
+      it.isChosen = false;
+    }
+  });
+
+  return new EventModel({
+    'type': formData.get(`event-type`),
+    'destination': typeCity,
+    'date_from': moment(formData.get(`event-start-time`), `DD/MM/YYYY HH:mm`)._d,
+    'date_to': moment(formData.get(`event-end-time`), `DD/MM/YYYY HH:mm`)._d,
+    'base_price': Number(formData.get(`event-price`)),
+    'offers': changedOffers[0].offers.filter((offer) => offer.isChosen === true),
+    'is_favorite': Boolean(formData.get(`event-favorite`))
+  });
+};
+
+
 export default class PointController {
-  constructor(container, onDataChange, onViewChange, onFavoriteButtonChange) {
+  constructor(container, onDataChange, onViewChange, onFavoriteButtonChange, destinations, offers) {
     this._container = container;
     this._eventComponent = null;
     this._eventEditComponent = null;
+    this._destinations = destinations;
+    this._offers = offers;
 
     this._mode = Mode.DEFAULT;
 
@@ -44,7 +77,7 @@ export default class PointController {
     this._mode = mode;
 
     this._eventComponent = new EventComponent(event);
-    this._eventEditComponent = new EventEditComponent(event);
+    this._eventEditComponent = new EventEditComponent(event, this._destinations, this._offers);
 
     this._eventComponent.setEditButtonClickHandler(() => {
       this._replaceEventToEdit();
@@ -55,15 +88,16 @@ export default class PointController {
     });
 
     this._eventEditComponent.setFavoritesButtonClickHandler(() => {
-      this._onFavoriteButtonChange(this, event, Object.assign({}, event, {
-        isFavorite: !event.isFavorite
-      }));
+      const newEvent = EventModel.clone(event);
+      newEvent.isFavorite = !newEvent.isFavorite;
+      this._onFavoriteButtonChange(this, event, newEvent);
     });
 
     this._eventEditComponent.setSubmitHandler((evt) => {
       evt.preventDefault();
-      const data = this._eventEditComponent.getData();
-      this._onDataChange(this, event, Object.assign({}, event, data));
+      const formData = this._eventEditComponent.getData();
+      const data = parseFormData(formData, this._destinations, this._offers);
+      this._onDataChange(this, event, data);
     });
     this._eventEditComponent.setDeleteButtonClickHandler(() => this._onDataChange(this, event, null));
 
