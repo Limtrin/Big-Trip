@@ -10,13 +10,13 @@ const textCapitalize = (text) => {
   }
 };
 
-const createOfferListMarkup = (offers) => {
-  return offers
-    .map((offer) => {
-      return offer.isChosen ? `<li class="event__offer">
-          <span class="event__offer-title">${offer.desc}</span>
+const createOfferListMarkup = (offersList) => {
+  return offersList
+    .map((offerItem) => {
+      return offerItem ? `<li class="event__offer">
+          <span class="event__offer-title">${offerItem.title}</span>
           &plus;
-          &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
+          &euro;&nbsp;<span class="event__offer-price">${offerItem.price}</span>
         </li>` : ``;
     })
     .join(`\n`);
@@ -28,7 +28,7 @@ const createItemTemplate = (event) => {
 
   const typePlaceholder = eventTypeTransfer.includes(type) ? `${textCapitalize(type)} to ${city ? city.name : ``}` : `${textCapitalize(type)} in ${city ? city.name : ``}`;
 
-  const createOffersMarkup = offers ? createOfferListMarkup(offers) : ``;
+  const createOffersMarkup = offers ? createOfferListMarkup(offers.slice(0, 3)) : ``;
 
   return (
     `<li class="trip-events__item">
@@ -65,13 +65,14 @@ const createItemTemplate = (event) => {
 };
 
 export default class Event extends AbstractComponent {
-  constructor(date) {
+  constructor(event, offers) {
     super();
-    this._date = date;
+    this._event = event;
+    this._offers = offers;
   }
 
   getTemplate() {
-    return createItemTemplate(this._date);
+    return createItemTemplate(this._event, this._offers);
   }
 
   setEditButtonClickHandler(handler) {

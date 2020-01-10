@@ -1,28 +1,30 @@
+import API from './api.js';
 import RouteComponent from './components/route.js';
 import TotalComponent from './components/total.js';
 import MenuComponent from './components/site-menu.js';
 import NewEventButtonComponent from './components/new-event-button.js';
 import StatisticsComponent from './components/statistics.js';
-import {generateEventList} from './mock/event.js';
 import {render, RenderPosition} from './utils/render.js';
 import TripController from './controllers/trip.js';
 import FilterController from './controllers/filter.js';
 import EventsModel from './models/points.js';
+import DestinationsModel from './models/destinations.js';
+import OffersModel from './models/offers.js';
 
-const EVENT_COUNT = 5;
+const AUTHORIZATION = `Basic eo0w590ik29889b`;
+const END_POINT = `https://htmlacademy-es-10.appspot.com/big-trip`;
 
+const api = new API(END_POINT, AUTHORIZATION);
 
-const events = generateEventList(EVENT_COUNT);
+const destinationsModel = new DestinationsModel();
+const offersModel = new OffersModel();
 const eventsModel = new EventsModel();
-eventsModel.setEvents(events);
 
 const siteTripMain = document.querySelector(`.trip-main`);
 const newEventButton = new NewEventButtonComponent();
 render(siteTripMain, newEventButton, RenderPosition.BEFOREEND);
 
 const siteRouteElement = document.querySelector(`.trip-main__trip-info`);
-render(siteRouteElement, new TotalComponent(events), RenderPosition.BEFOREEND);
-render(siteRouteElement, new RouteComponent(events), RenderPosition.AFTERBEGIN);
 
 
 const siteControlsElement = document.querySelector(`.trip-main__trip-controls`);
@@ -35,8 +37,7 @@ filterController.render();
 
 const siteMainElement = document.querySelector(`.trip-events`);
 
-const tripController = new TripController(siteMainElement, eventsModel);
-tripController.render();
+const tripController = new TripController(siteMainElement, eventsModel, destinationsModel, offersModel, api);
 render(siteMainElement, statisticsComponent, RenderPosition.AFTEREND);
 statisticsComponent.hide();
 
@@ -62,3 +63,20 @@ siteMenuComponent.setOnChange((menuItem) => {
       break;
   }
 });
+
+const getEvents = api.getEvents();
+const getDestinations = api.getDestinations();
+const getOffers = api.getOffers();
+
+Promise.all([getOffers, getDestinations, getEvents])
+  .then((res) => {
+    const [offers, destinations, events] = res;
+
+    offersModel.setOffers(offers);
+    destinationsModel.setDestinations(destinations);
+
+    eventsModel.setEvents(events);
+    tripController.render();
+    render(siteRouteElement, new TotalComponent(events), RenderPosition.BEFOREEND);
+    render(siteRouteElement, new RouteComponent(events), RenderPosition.AFTERBEGIN);
+  });
