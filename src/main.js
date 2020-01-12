@@ -25,7 +25,7 @@ render(siteTripMain, newEventButton, RenderPosition.BEFOREEND);
 const siteControlsElement = document.querySelector(`.trip-main__trip-controls`);
 const siteMenuComponent = new MenuComponent();
 render(siteControlsElement.firstElementChild, siteMenuComponent, RenderPosition.AFTEREND);
-const statisticsComponent = new StatisticsComponent(eventsModel.getEvents());
+const statisticsComponent = new StatisticsComponent(eventsModel.getEventsAll());
 
 const filterController = new FilterController(siteControlsElement.lastElementChild, eventsModel);
 filterController.render();
@@ -49,7 +49,7 @@ siteMenuComponent.setOnChange((menuItem) => {
     case `Stats`:
       tripController.hide();
       filterController.hide();
-      statisticsComponent.show(eventsModel.getEvents());
+      statisticsComponent.show(eventsModel.getEventsAll());
       break;
     case `Table`:
       statisticsComponent.hide();
