@@ -167,13 +167,25 @@ export default class TripController {
         pointController.destroy();
         this._updateEvents();
       } else {
-        this._eventsModel.addEvent(newData);
-        pointController.render(newData, TaskControllerMode.DEFAULT);
-        this._updateEvents();
+        this._api.createEvent(newData)
+          .then((eventModel) => {
+            this._eventsModel.addEvent(eventModel);
+            pointController.render(eventModel, TaskControllerMode.DEFAULT);
+            this._updateEvents();
+          })
+          .catch(() => {
+            pointController.shake();
+          });
       }
     } else if (newData === null) {
-      this._eventsModel.removeEvent(oldData.id);
-      this._updateEvents();
+      this._api.deleteEvent(oldData.id)
+          .then(() => {
+            this._eventsModel.removeEvent(oldData.id);
+            this._updateEvents();
+          })
+          .catch(() => {
+            pointController.shake();
+          });
     } else {
       this._api.updateEvent(oldData.id, newData)
         .then((eventModel) => {
@@ -181,6 +193,9 @@ export default class TripController {
           if (isSuccess) {
             this._updateEvents();
           }
+        })
+        .catch(() => {
+          pointController.shake();
         });
     }
   }
@@ -190,6 +205,9 @@ export default class TripController {
       .then((eventModel) => {
         this._eventsModel.updateEvent(oldData.id, eventModel);
         pointController.render(eventModel, TaskControllerMode.DEFAULT);
+      })
+      .catch(() => {
+        pointController.shakeForFavorite();
       });
   }
 

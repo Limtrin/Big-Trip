@@ -1,4 +1,4 @@
-import {filterItems} from '../mock/filter.js';
+import {filterItems} from '../constants';
 import {getEventsByFilter} from '../utils/filter.js';
 
 export default class EventsModel {

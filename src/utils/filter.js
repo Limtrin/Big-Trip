@@ -1,4 +1,4 @@
-import {filterItems} from '../mock/filter.js';
+import {filterItems} from '../constants.js';
 
 export const getEventsByFilter = (events, filterType) => {
   switch (filterType) {

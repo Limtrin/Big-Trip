@@ -10,6 +10,8 @@ export const Mode = {
   EDIT: `edit`,
 };
 
+const SHAKE_ANIMATION_TIMEOUT = 600;
+
 export const EmptyEvent = {
   type: `flight`,
   city: null,
@@ -95,11 +97,21 @@ export default class PointController {
 
     this._eventEditComponent.setSubmitHandler((evt) => {
       evt.preventDefault();
+
+      this._eventEditComponent.changeSaveButtonText(`Saving...`);
+      this._eventEditComponent.switchButtonsBlock();
+
       const formData = this._eventEditComponent.getData();
       const data = parseFormData(formData, this._destinations, this._offers);
       this._onDataChange(this, event, data);
     });
-    this._eventEditComponent.setDeleteButtonClickHandler(() => this._onDataChange(this, event, null));
+
+    this._eventEditComponent.setDeleteButtonClickHandler(() => {
+      this._eventEditComponent.changeDeleteButtonText(`Deleting...`);
+      this._eventEditComponent.switchButtonsBlock();
+
+      this._onDataChange(this, event, null);
+    });
 
     switch (mode) {
       case Mode.DEFAULT:
@@ -125,6 +137,35 @@ export default class PointController {
     remove(this._eventEditComponent);
     remove(this._eventComponent);
     document.removeEventListener(`keydown`, this._onEscKeyDown);
+  }
+
+  shake() {
+    this._eventEditComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    this._eventComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+
+    this._eventEditComponent.getElement().style.border = `2px solid red`;
+    this._eventComponent.getElement().style.border = `2px solid red`;
+
+    setTimeout(() => {
+      this._eventEditComponent.getElement().style.animation = ``;
+      this._eventComponent.getElement().style.animation = ``;
+
+      this._eventEditComponent.changeSaveButtonText(`Save`);
+      this._eventEditComponent.changeDeleteButtonText(`Delete`);
+      this._eventEditComponent.switchButtonsBlock();
+    }, SHAKE_ANIMATION_TIMEOUT);
+  }
+
+  shakeForFavorite() {
+    this._eventEditComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    this._eventComponent.getElement().style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+
+    this._eventEditComponent.getElement().style.border = `2px solid red`;
+    this._eventComponent.getElement().style.border = `2px solid red`;
+    setTimeout(() => {
+      this._eventEditComponent.getElement().style.animation = ``;
+      this._eventComponent.getElement().style.animation = ``;
+    }, SHAKE_ANIMATION_TIMEOUT);
   }
 
   _replaceEditToEvent() {
