@@ -1,4 +1,4 @@
-import {filterItems} from '../mock/filter.js';
+import {filterItems} from '../constants.js';
 import FilterComponent from '../components/filter.js';
 import {render, replace, RenderPosition} from '../utils/render.js';
 

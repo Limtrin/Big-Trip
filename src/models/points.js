@@ -1,4 +1,4 @@
-import {filterItems} from '../mock/filter.js';
+import {filterItems} from '../constants';
 import {getEventsByFilter} from '../utils/filter.js';
 
 export default class EventsModel {
@@ -59,6 +59,10 @@ export default class EventsModel {
   setFilter(filterType) {
     this._activateFilterType = filterType;
     this._callHandlers(this._filterChangeHandlers);
+  }
+
+  getFilter() {
+    return this._activateFilterType;
   }
 
   setFilterChangeHandler(handler) {

@@ -4,6 +4,11 @@ import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 import AbstractSmartComponent from './abstract-smart-component.js';
 
+const DefaultData = {
+  deleteButtonText: `Delete`,
+  cancelButtonText: `Cancel`,
+  saveButtonText: `Save`,
+};
 
 const textCapitalize = (text) => {
   if (text) {
@@ -67,7 +72,7 @@ const createEventEditTemplate = (event, options = {}) => {
 
   const {dateBegining, dateEnding, price, isFavorite} = event;
 
-  const {type, offers, city, isNew, destinationsList, offersList} = options;
+  const {type, offers, city, isNew, destinationsList, offersList, externalData} = options;
 
   const typePlaceholder = eventTypeTransfer.includes(type) ? `${textCapitalize(type)} to` : `${textCapitalize(type)} in`;
 
@@ -82,6 +87,9 @@ const createEventEditTemplate = (event, options = {}) => {
       offerItem.isChosen = true;
     }
   });
+
+  const deleteButtonText = isNew ? externalData.cancelButtonText : externalData.deleteButtonText;
+  const saveButtonText = externalData.saveButtonText;
 
   const offersMarkup = createOfferListMarkup(changedOffers[0].offers);
 
@@ -139,8 +147,8 @@ const createEventEditTemplate = (event, options = {}) => {
           <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${price}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit" ${city ? `` : `disabled`}>Save</button>
-        <button class="event__reset-btn" type="reset">${isNew ? `Cancel` : `Delete`}</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${city ? `` : `disabled`}>${saveButtonText}</button>
+        <button class="event__reset-btn" type="reset">${deleteButtonText}</button>
 
         ${isNew ? `` : `<input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
         <label class="event__favorite-btn" for="event-favorite-1">
@@ -194,6 +202,7 @@ export default class EditEvent extends AbstractSmartComponent {
     this._deleteButtonClickHandler = null;
     this._editButtonHandler = null;
     this._favoriteButtonHandler = null;
+    this._externalData = DefaultData;
 
     this._applyFlatpickr();
     this._subscribeOnEvents();
@@ -207,7 +216,8 @@ export default class EditEvent extends AbstractSmartComponent {
       city: this._city,
       isNew: this._isNew,
       destinationsList: this._destinationsList,
-      offersList: this._offersList.filter((offerItem) => offerItem.type === this._type)
+      offersList: this._offersList.filter((offerItem) => offerItem.type === this._type),
+      externalData: this._externalData
     });
   }
 
@@ -244,8 +254,8 @@ export default class EditEvent extends AbstractSmartComponent {
         allowInput: true,
         enableTime: true,
         dateFormat: `d/m/Y H:i`,
-        minDate: this.getData().dateBegining,
-        defaultDate: this.getData().dateBegining
+        minDate: this.getData().get(`event-start-time`),
+        defaultDate: this.getData().get(`event-start-time`)
       });
     });
   }
@@ -253,6 +263,31 @@ export default class EditEvent extends AbstractSmartComponent {
   getData() {
     const form = this.getElement();
     return new FormData(form);
+  }
+
+  setData(data) {
+    this._externalData = Object.assign({}, DefaultData, data);
+    this.rerender();
+  }
+
+  changeSaveButtonText(text) {
+    this.getElement().querySelector(`.event__save-btn`).innerHTML = text;
+  }
+
+  changeDeleteButtonText(text) {
+    this.getElement().querySelector(`.event__reset-btn`).innerHTML = text;
+  }
+
+  switchButtonsBlock() {
+    const saveButton = this.getElement().querySelector(`.event__save-btn`);
+    const removeButton = this.getElement().querySelector(`.event__reset-btn`);
+    if (saveButton.hasAttribute(`disabled`) || removeButton.hasAttribute(`disabled`)) {
+      saveButton.removeAttribute(`disabled`);
+      removeButton.removeAttribute(`disabled`);
+    } else {
+      saveButton.setAttribute(`disabled`, `disabled`);
+      removeButton.setAttribute(`disabled`, `disabled`);
+    }
   }
 
   setSubmitHandler(handler) {

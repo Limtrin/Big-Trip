@@ -1,4 +1,6 @@
 import {render, RenderPosition} from '../utils/render.js';
+import RouteComponent from '../components/route.js';
+import TotalComponent from '../components/total.js';
 import PointController from './point.js';
 import NoEventsComponent from '../components/no-events.js';
 import BoardComponent from '../components/board.js';
@@ -68,6 +70,8 @@ export default class TripController {
     this._sortComponent = new SortComponent();
     this._boardComponent = new BoardComponent();
     this._noEventsComponent = new NoEventsComponent();
+    this._totalComponent = new TotalComponent();
+    this._routeComponent = new RouteComponent();
     this._onDataChange = this._onDataChange.bind(this);
     this._onFavoriteButtonChange = this._onFavoriteButtonChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
@@ -90,6 +94,8 @@ export default class TripController {
     render(this._container, this._sortComponent, RenderPosition.BEFOREEND);
     render(this._container, this._boardComponent, RenderPosition.BEFOREEND);
 
+    this._updateTotalAndRoute(events);
+
     const tripDaysElement = this._container.querySelector(`.trip-days`);
 
     this._eventsList = renderEvents(events, tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
@@ -100,10 +106,27 @@ export default class TripController {
       return;
     }
     this._onViewChange();
+    if (!this._container.querySelector(`.trip-days`)) {
+      this._container.innerHTML = `<ul class="trip-days"></ul>`;
+    }
     const tripDaysElement = this._container.querySelector(`.trip-days`);
     this._creatingEvent = new PointController(tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
     this._creatingEvent.render(EmptyEvent, TaskControllerMode.ADDING);
     this._eventsList.unshift(this._creatingEvent);
+  }
+
+  _updateTotalAndRoute(events) {
+    this._totalComponent.removeElement();
+    this._routeComponent.removeElement();
+
+    this._totalComponent.setEvents(events);
+    this._routeComponent.setEvents(events);
+
+    const siteRouteElement = document.querySelector(`.trip-main__trip-info`);
+    siteRouteElement.innerHTML = ``;
+
+    render(siteRouteElement, this._totalComponent, RenderPosition.BEFOREEND);
+    render(siteRouteElement, this._routeComponent, RenderPosition.AFTERBEGIN);
   }
 
   _updateEvents() {
@@ -122,6 +145,11 @@ export default class TripController {
   }
 
   _renderEvents(events = this._eventsModel.getEvents()) {
+    if (events.length === 0) {
+      this._container.innerHTML = ``;
+      render(this._container, this._noEventsComponent, RenderPosition.BEFOREEND);
+      return;
+    }
     const tripDaysElement = this._container.querySelector(`.trip-days`);
     this._eventsList = renderEvents(events, tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
   }
@@ -167,20 +195,38 @@ export default class TripController {
         pointController.destroy();
         this._updateEvents();
       } else {
-        this._eventsModel.addEvent(newData);
-        pointController.render(newData, TaskControllerMode.DEFAULT);
-        this._updateEvents();
+        this._api.createEvent(newData)
+          .then((eventModel) => {
+            this._eventsModel.addEvent(eventModel);
+            pointController.render(eventModel, TaskControllerMode.DEFAULT);
+            this._updateEvents();
+            this._updateTotalAndRoute(this._eventsModel.getEventsAll());
+          })
+          .catch(() => {
+            pointController.shake();
+          });
       }
     } else if (newData === null) {
-      this._eventsModel.removeEvent(oldData.id);
-      this._updateEvents();
+      this._api.deleteEvent(oldData.id)
+          .then(() => {
+            this._eventsModel.removeEvent(oldData.id);
+            this._updateEvents();
+            this._updateTotalAndRoute(this._eventsModel.getEventsAll());
+          })
+          .catch(() => {
+            pointController.shake();
+          });
     } else {
       this._api.updateEvent(oldData.id, newData)
         .then((eventModel) => {
           const isSuccess = this._eventsModel.updateEvent(oldData.id, eventModel);
           if (isSuccess) {
             this._updateEvents();
+            this._updateTotalAndRoute(this._eventsModel.getEventsAll());
           }
+        })
+        .catch(() => {
+          pointController.shake();
         });
     }
   }
@@ -190,12 +236,17 @@ export default class TripController {
       .then((eventModel) => {
         this._eventsModel.updateEvent(oldData.id, eventModel);
         pointController.render(eventModel, TaskControllerMode.DEFAULT);
+      })
+      .catch(() => {
+        pointController.shakeForFavorite();
       });
   }
 
   _onViewChange() {
     this._creatingEvent = null;
-    this._eventsList.forEach((it) => it.setDefaultView());
+    if (this._eventsList) {
+      this._eventsList.forEach((it) => it.setDefaultView());
+    }
   }
 
   _onFilterChange() {
