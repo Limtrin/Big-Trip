@@ -22,12 +22,16 @@ const createRouteTemplate = (events) => {
 
 
 export default class Route extends AbstractComponent {
-  constructor(events) {
+  constructor() {
     super();
-    this._events = events;
+    this._events = null;
   }
 
   getTemplate() {
     return createRouteTemplate(this._events);
+  }
+
+  setEvents(events) {
+    this._events = events;
   }
 }

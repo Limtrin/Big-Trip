@@ -1,6 +1,4 @@
 import API from './api.js';
-import RouteComponent from './components/route.js';
-import TotalComponent from './components/total.js';
 import MenuComponent from './components/site-menu.js';
 import NewEventButtonComponent from './components/new-event-button.js';
 import StatisticsComponent from './components/statistics.js';
@@ -11,7 +9,7 @@ import EventsModel from './models/points.js';
 import DestinationsModel from './models/destinations.js';
 import OffersModel from './models/offers.js';
 
-const AUTHORIZATION = `Basic eo0w590ik29889b`;
+const AUTHORIZATION = `Basic eo0w590ik29889a`;
 const END_POINT = `https://htmlacademy-es-10.appspot.com/big-trip`;
 
 const api = new API(END_POINT, AUTHORIZATION);
@@ -23,9 +21,6 @@ const eventsModel = new EventsModel();
 const siteTripMain = document.querySelector(`.trip-main`);
 const newEventButton = new NewEventButtonComponent();
 render(siteTripMain, newEventButton, RenderPosition.BEFOREEND);
-
-const siteRouteElement = document.querySelector(`.trip-main__trip-info`);
-
 
 const siteControlsElement = document.querySelector(`.trip-main__trip-controls`);
 const siteMenuComponent = new MenuComponent();
@@ -77,6 +72,4 @@ Promise.all([getOffers, getDestinations, getEvents])
 
     eventsModel.setEvents(events);
     tripController.render();
-    render(siteRouteElement, new TotalComponent(events), RenderPosition.BEFOREEND);
-    render(siteRouteElement, new RouteComponent(events), RenderPosition.AFTERBEGIN);
   });

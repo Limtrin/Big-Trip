@@ -61,6 +61,10 @@ export default class EventsModel {
     this._callHandlers(this._filterChangeHandlers);
   }
 
+  getFilter() {
+    return this._activateFilterType;
+  }
+
   setFilterChangeHandler(handler) {
     this._filterChangeHandlers.push(handler);
   }

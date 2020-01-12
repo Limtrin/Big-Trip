@@ -254,8 +254,8 @@ export default class EditEvent extends AbstractSmartComponent {
         allowInput: true,
         enableTime: true,
         dateFormat: `d/m/Y H:i`,
-        minDate: this.getData().dateBegining,
-        defaultDate: this.getData().dateBegining
+        minDate: this.getData().get(`event-start-time`),
+        defaultDate: this.getData().get(`event-start-time`)
       });
     });
   }
