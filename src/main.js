@@ -1,4 +1,6 @@
-import API from './api.js';
+import Api from './api/index.js';
+import Store from './api/store.js';
+import Provider from './api/provider.js';
 import MenuComponent from './components/site-menu.js';
 import NewEventButtonComponent from './components/new-event-button.js';
 import StatisticsComponent from './components/statistics.js';
@@ -9,13 +11,22 @@ import EventsModel from './models/points.js';
 import DestinationsModel from './models/destinations.js';
 import OffersModel from './models/offers.js';
 
-const AUTHORIZATION = `Basic eo0w590ik29889a`;
+const STORE_PREFIX = `bigtrip-localstorage`;
+const STORE_VER = `v1`;
+const STORE_NAME = `${STORE_PREFIX}-${STORE_VER}`;
+const AUTHORIZATION = `Basic eo0w590ik29889b`;
 const END_POINT = `https://htmlacademy-es-10.appspot.com/big-trip`;
 
-const api = new API(END_POINT, AUTHORIZATION);
-const getEvents = api.getEvents();
-const getDestinations = api.getDestinations();
-const getOffers = api.getOffers();
+window.addEventListener(`load`, () => {
+  navigator.serviceWorker.register(`/sw.js`);
+});
+
+const api = new Api(END_POINT, AUTHORIZATION);
+const store = new Store(STORE_NAME, window.localStorage);
+const apiWithProvider = new Provider(api, store);
+const getEvents = apiWithProvider.getEvents();
+const getDestinations = apiWithProvider.getDestinations();
+const getOffers = apiWithProvider.getOffers();
 
 const destinationsModel = new DestinationsModel();
 const offersModel = new OffersModel();
@@ -28,7 +39,7 @@ const siteControlsElement = document.querySelector(`.trip-main__trip-controls`);
 const filterController = new FilterController(siteControlsElement.lastElementChild, eventsModel);
 
 const siteMainElement = document.querySelector(`.trip-events`);
-const tripController = new TripController(siteMainElement, eventsModel, destinationsModel, offersModel, api);
+const tripController = new TripController(siteMainElement, eventsModel, destinationsModel, offersModel, apiWithProvider);
 
 const siteTripMain = document.querySelector(`.trip-main`);
 
@@ -54,6 +65,7 @@ siteMenuComponent.setOnChange((menuItem) => {
       }
       tripController.hide();
       filterController.hide();
+
       statisticsComponent.show(eventsModel.getEventsAll());
       break;
     case `Table`:
@@ -68,9 +80,22 @@ Promise.all([getOffers, getDestinations, getEvents])
   .then((res) => {
     const [offers, destinations, events] = res;
 
+
     offersModel.setOffers(offers);
     destinationsModel.setDestinations(destinations);
 
     eventsModel.setEvents(events);
     tripController.render();
   });
+
+window.addEventListener(`online`, () => {
+  document.title = document.title.replace(` [offline]`, ``);
+
+  if (!apiWithProvider.getSynchronize()) {
+    apiWithProvider.sync();
+  }
+});
+
+window.addEventListener(`offline`, () => {
+  document.title += ` [offline]`;
+});
