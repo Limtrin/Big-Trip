@@ -21,7 +21,7 @@ const createRouteTemplate = (events) => {
 };
 
 
-export default class Route extends AbstractComponent {
+export default class Total extends AbstractComponent {
   constructor() {
     super();
     this._events = null;

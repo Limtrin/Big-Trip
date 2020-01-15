@@ -10,7 +10,7 @@ export default class Event {
     this.dateBegining = data[`date_from`] ? new Date(data[`date_from`]) : null;
     this.dateEnding = data[`date_to`] ? new Date(data[`date_to`]) : null;
     this.price = data[`base_price`];
-    this.offers = data[`offers`] || ``;
+    this.offers = data[`offers`].map((offer) => Object.assign({}, offer, {isChosen: true})) || ``;
     this.isFavorite = data[`is_favorite`];
     this.isNew = false;
   }

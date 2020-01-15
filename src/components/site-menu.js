@@ -2,11 +2,6 @@ import AbstractComponent from "./abstract-class";
 
 const CHECKED_CLASS = `trip-tabs__btn--active`;
 
-export const menuItems = [
-  `Table`,
-  `Stats`
-];
-
 const createSiteMenuTemplate = (items) => {
 
   return (
@@ -17,6 +12,10 @@ const createSiteMenuTemplate = (items) => {
   );
 };
 
+export const menuItems = [
+  `Table`,
+  `Stats`
+];
 
 export default class Menu extends AbstractComponent {
   constructor() {

@@ -19,25 +19,25 @@ const Emogi = {
 Emogi[`check-in`] = `🏬`;
 
 const dataSort = (typeLabels, dataLabels) => {
-  const arrayOfObj = typeLabels.map((d, i) => {
+  const chartsData = typeLabels.map((chartItem, index) => {
     return {
-      label: d,
-      data: dataLabels[i]
+      label: chartItem,
+      data: dataLabels[index]
     };
   });
 
-  const sortedArrayOfObj = arrayOfObj.sort((a, b) => {
-    return b.data - a.data;
+  const sortedChartsData = chartsData.sort((currentItem, nextItem) => {
+    return nextItem.data - currentItem.data;
   });
 
-  const arrayLabels = [];
-  const arrayData = [];
-  sortedArrayOfObj.forEach((d) => {
-    arrayLabels.push(d.label);
-    arrayData.push(d.data);
+  const labels = [];
+  const data = [];
+  sortedChartsData.forEach((sortedChartItem) => {
+    labels.push(sortedChartItem.label);
+    data.push(sortedChartItem.data);
   });
 
-  return [arrayLabels, arrayData];
+  return [labels, data];
 };
 
 const formatDateToTime = (array) => {
@@ -61,15 +61,15 @@ const setMinutesToDaysAndHours = (minutes) => {
   return formattedTime;
 };
 
-const renderChart = (ctx, dataArray, title, formatter) => {
+const renderChart = (ctx, dataItems, title, formatter) => {
   return new Chart(ctx, {
     plugins: [ChartDataLabels],
     type: `horizontalBar`,
     data: {
-      labels: dataArray[0],
+      labels: dataItems[0],
       datasets: [{
-        data: dataArray[1],
-        backgroundColor: dataArray[0].map(() => `#ffffff`),
+        data: dataItems[1],
+        backgroundColor: dataItems[0].map(() => `#ffffff`),
         categoryPercentage: 0.5
       }]
     },
@@ -119,7 +119,7 @@ const renderChart = (ctx, dataArray, title, formatter) => {
   });
 };
 
-const moneyChart = (ctx, events) => {
+const renderMoneyChart = (ctx, events) => {
   const typeLabels = events.map((event) => event.type)
   .reduce((unique, item) => unique.includes(item) ? unique : [...unique, item], []);
 
@@ -127,12 +127,11 @@ const moneyChart = (ctx, events) => {
     if (event === item.type) {
       acc += item.price;
       return acc;
-    } else {
-      return acc;
     }
+    return acc;
   }, 0));
 
-  const dataArray = dataSort(typeLabels, dataLabels);
+  const dataItems = dataSort(typeLabels, dataLabels);
 
   const formatter = () => {
     return (value) => {
@@ -140,10 +139,10 @@ const moneyChart = (ctx, events) => {
     };
   };
 
-  return renderChart(ctx, dataArray, `MONEY`, formatter);
+  return renderChart(ctx, dataItems, `MONEY`, formatter);
 };
 
-const transportChart = (ctx, events) => {
+const renderTransportChart = (ctx, events) => {
   const typeLabels = events.map((event) => event.type)
   .reduce((unique, item) => unique.includes(item) ? unique : [...unique, item], [])
   .filter((label) => eventTypeTransfer.includes(label));
@@ -152,12 +151,11 @@ const transportChart = (ctx, events) => {
     if (event === item.type) {
       acc += 1;
       return acc;
-    } else {
-      return acc;
     }
+    return acc;
   }, 0));
 
-  const dataArray = dataSort(typeLabels, dataLabels);
+  const dataItems = dataSort(typeLabels, dataLabels);
 
   const formatter = () => {
     return (value) => {
@@ -165,10 +163,10 @@ const transportChart = (ctx, events) => {
     };
   };
 
-  return renderChart(ctx, dataArray, `TRANSPORT`, formatter);
+  return renderChart(ctx, dataItems, `TRANSPORT`, formatter);
 };
 
-const timeChart = (ctx, events) => {
+const renderTimeChart = (ctx, events) => {
   const typeLabels = events.map((event) => event.type)
   .reduce((unique, item) => unique.includes(item) ? unique : [...unique, item], []);
 
@@ -179,21 +177,20 @@ const timeChart = (ctx, events) => {
       acc[1] += dateDifference[1];
       acc[2] += dateDifference[2];
       return acc;
-    } else {
-      return acc;
     }
+    return acc;
   }, [0, 0, 0]));
 
   const formattedLabels = dataLabels.map((date) => formatDateToTime(date));
 
-  const dataArray = dataSort(typeLabels, formattedLabels);
+  const dataItems = dataSort(typeLabels, formattedLabels);
 
   const formatter = () => {
     return (value) => {
       return setMinutesToDaysAndHours(value);
     };
   };
-  return renderChart(ctx, dataArray, `TIME SPENT`, formatter);
+  return renderChart(ctx, dataItems, `TIME SPENT`, formatter);
 };
 
 const createStatisticsTemplate = () => {
@@ -210,7 +207,7 @@ const createStatisticsTemplate = () => {
       <div class="statistics__item statistics__item--time-spend">
         <canvas class="statistics__chart  statistics__chart--time" width="900"></canvas>
       </div>
-  </section>`
+    </section>`
   );
 };
 
@@ -240,9 +237,9 @@ export default class Statistics extends AbstractSmartComponent {
 
     this._resetCharts();
 
-    this._moneyChart = moneyChart(ctxMoney, this._events);
-    this._transportChart = transportChart(ctxTransport, this._events);
-    this._timeChart = timeChart(ctxTime, this._events);
+    this._moneyChart = renderMoneyChart(ctxMoney, this._events);
+    this._transportChart = renderTransportChart(ctxTransport, this._events);
+    this._timeChart = renderTimeChart(ctxTime, this._events);
 
   }
 

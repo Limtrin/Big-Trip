@@ -13,26 +13,28 @@ const AUTHORIZATION = `Basic eo0w590ik29889a`;
 const END_POINT = `https://htmlacademy-es-10.appspot.com/big-trip`;
 
 const api = new API(END_POINT, AUTHORIZATION);
+const getEvents = api.getEvents();
+const getDestinations = api.getDestinations();
+const getOffers = api.getOffers();
 
 const destinationsModel = new DestinationsModel();
 const offersModel = new OffersModel();
 const eventsModel = new EventsModel();
-
-const siteTripMain = document.querySelector(`.trip-main`);
 const newEventButton = new NewEventButtonComponent();
-render(siteTripMain, newEventButton, RenderPosition.BEFOREEND);
-
-const siteControlsElement = document.querySelector(`.trip-main__trip-controls`);
 const siteMenuComponent = new MenuComponent();
-render(siteControlsElement.firstElementChild, siteMenuComponent, RenderPosition.AFTEREND);
 const statisticsComponent = new StatisticsComponent(eventsModel.getEventsAll());
 
+const siteControlsElement = document.querySelector(`.trip-main__trip-controls`);
 const filterController = new FilterController(siteControlsElement.lastElementChild, eventsModel);
-filterController.render();
 
 const siteMainElement = document.querySelector(`.trip-events`);
-
 const tripController = new TripController(siteMainElement, eventsModel, destinationsModel, offersModel, api);
+
+const siteTripMain = document.querySelector(`.trip-main`);
+
+render(siteTripMain, newEventButton, RenderPosition.BEFOREEND);
+render(siteControlsElement.firstElementChild, siteMenuComponent, RenderPosition.AFTEREND);
+filterController.render();
 render(siteMainElement, statisticsComponent, RenderPosition.AFTEREND);
 statisticsComponent.hide();
 
@@ -47,6 +49,9 @@ newEventButton.setClickNewEventButtonChangeHandler(() => {
 siteMenuComponent.setOnChange((menuItem) => {
   switch (menuItem) {
     case `Stats`:
+      if (eventsModel.getEventsAll().length === 0) {
+        break;
+      }
       tripController.hide();
       filterController.hide();
       statisticsComponent.show(eventsModel.getEventsAll());
@@ -58,10 +63,6 @@ siteMenuComponent.setOnChange((menuItem) => {
       break;
   }
 });
-
-const getEvents = api.getEvents();
-const getDestinations = api.getDestinations();
-const getOffers = api.getOffers();
 
 Promise.all([getOffers, getDestinations, getEvents])
   .then((res) => {

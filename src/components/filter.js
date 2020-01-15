@@ -1,8 +1,5 @@
 import AbstractComponent from "./abstract-class";
-
-const textCapitalize = (text) => {
-  return text[0].toUpperCase() + text.slice(1);
-};
+import {textCapitalize} from "../utils/common.js";
 
 const createFilterMarkup = (items) => {
   return Object.values(items)

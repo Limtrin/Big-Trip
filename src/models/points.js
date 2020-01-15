@@ -28,7 +28,7 @@ export default class EventsModel {
   }
 
   updateEvent(id, event) {
-    const index = this._events.findIndex((it) => it.id === id);
+    const index = this._events.findIndex((eventItem) => eventItem.id === id);
 
     if (index === -1) {
       return false;
@@ -43,7 +43,7 @@ export default class EventsModel {
   }
 
   removeEvent(id) {
-    const index = this._events.findIndex((it) => it.id === id);
+    const index = this._events.findIndex((eventItem) => eventItem.id === id);
 
     if (index === -1) {
       return false;
@@ -78,6 +78,6 @@ export default class EventsModel {
   }
 
   _sortEvents(events) {
-    return events.sort((a, b) => a.dateBegining - b.dateBegining);
+    return events.sort((currentEvent, nextEvent) => currentEvent.dateBegining - nextEvent.dateBegining);
   }
 }

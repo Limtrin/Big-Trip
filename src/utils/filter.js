@@ -5,9 +5,9 @@ export const getEventsByFilter = (events, filterType) => {
     case filterItems.EVERITHING:
       return events;
     case filterItems.PAST:
-      return events.filter((it) => it.dateEnding < new Date());
+      return events.filter((event) => event.dateEnding < new Date());
     case filterItems.FUTURE:
-      return events.filter((it) => it.dateBegining > new Date());
+      return events.filter((event) => event.dateBegining > new Date());
   }
 
   return events;

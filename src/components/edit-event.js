@@ -1,21 +1,14 @@
 import {eventTypeTransfer, eventTypeActivity} from '../constants.js';
-import {formatTime} from '../utils/common.js';
+import {formatTime, textCapitalize} from '../utils/common.js';
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 import AbstractSmartComponent from './abstract-smart-component.js';
+import moment from 'moment';
 
 const DefaultData = {
   deleteButtonText: `Delete`,
   cancelButtonText: `Cancel`,
   saveButtonText: `Save`,
-};
-
-const textCapitalize = (text) => {
-  if (text) {
-    return text[0].toUpperCase() + text.slice(1);
-  } else {
-    return ``;
-  }
 };
 
 const createTypeListMarkup = (eventTypeList, currentType) => {
@@ -68,11 +61,9 @@ const createOfferListMarkup = (offersList) => {
     .join(`\n`);
 };
 
-const createEventEditTemplate = (event, options = {}) => {
+const createEventEditTemplate = (options = {}) => {
 
-  const {dateBegining, dateEnding, price, isFavorite} = event;
-
-  const {type, offers, city, isNew, destinationsList, offersList, externalData} = options;
+  const {type, offers, city, isNew, destinationsList, offersList, externalData, dateBegining, dateEnding, price, isFavorite} = options;
 
   const typePlaceholder = eventTypeTransfer.includes(type) ? `${textCapitalize(type)} to` : `${textCapitalize(type)} in`;
 
@@ -83,7 +74,7 @@ const createEventEditTemplate = (event, options = {}) => {
   const changedOffers = JSON.parse(JSON.stringify(offersList));
 
   changedOffers[0].offers.map((offerItem) => {
-    if (offers.map((it) => it.title).includes(offerItem.title)) {
+    if (offers.map((offer) => offer.title).includes(offerItem.title)) {
       offerItem.isChosen = true;
     }
   });
@@ -197,6 +188,10 @@ export default class EditEvent extends AbstractSmartComponent {
     this._offers = event.offers;
     this._city = event.city;
     this._isNew = event.isNew;
+    this._dateBegining = event.dateBegining;
+    this._dateEnding = event.dateEnding;
+    this._price = event.price;
+    this._isFavorite = event.isFavorite;
     this._flatpickr = null;
     this._submitHandler = null;
     this._deleteButtonClickHandler = null;
@@ -210,15 +205,25 @@ export default class EditEvent extends AbstractSmartComponent {
   }
 
   getTemplate() {
-    return createEventEditTemplate(this._event, {
+    return createEventEditTemplate({
       type: this._type,
       offers: this._offers,
       city: this._city,
       isNew: this._isNew,
       destinationsList: this._destinationsList,
       offersList: this._offersList.filter((offerItem) => offerItem.type === this._type),
-      externalData: this._externalData
+      externalData: this._externalData,
+      dateBegining: this._dateBegining,
+      dateEnding: this._dateEnding,
+      price: this._price,
+      isFavorite: this._isFavorite
     });
+  }
+
+  changeFavoriteStatus() {
+    this._isFavorite = !this._isFavorite;
+    this._saveFormChanges();
+    this.rerender();
   }
 
   _applyFlatpickr() {
@@ -232,7 +237,7 @@ export default class EditEvent extends AbstractSmartComponent {
       allowInput: true,
       enableTime: true,
       dateFormat: `d/m/Y H:i`,
-      defaultDate: this._event.dateBegining
+      defaultDate: this._dateBegining
     });
 
     const dateEndingElement = this.getElement().querySelector(`#event-end-time-1`);
@@ -240,8 +245,8 @@ export default class EditEvent extends AbstractSmartComponent {
       allowInput: true,
       enableTime: true,
       dateFormat: `d/m/Y H:i`,
-      minDate: this._event.dateBegining,
-      defaultDate: this._event.dateEnding
+      minDate: this._dateBegining,
+      defaultDate: this._dateEnding
     });
   }
 
@@ -263,6 +268,32 @@ export default class EditEvent extends AbstractSmartComponent {
   getData() {
     const form = this.getElement();
     return new FormData(form);
+  }
+
+  _saveFormChanges() {
+    const formData = new FormData(this.getElement());
+
+    const changedOffers = JSON.parse(JSON.stringify(this._offersList)).filter((it) => it.type === formData.get(`event-type`));
+
+    const chosenOffers = [];
+
+    changedOffers[0].offers.forEach((changedOffer) => {
+      chosenOffers.push(formData.get(`event-offer-${changedOffer.title}`));
+    });
+
+    changedOffers[0].offers.forEach((changedOffer, index) => {
+      if (chosenOffers[index]) {
+        changedOffer.isChosen = true;
+      } else {
+        changedOffer.isChosen = false;
+      }
+    });
+
+    this._type = formData.get(`event-type`);
+    this._dateBegining = moment(formData.get(`event-start-time`), `DD/MM/YYYY HH:mm`)._d;
+    this._dateEnding = moment(formData.get(`event-end-time`), `DD/MM/YYYY HH:mm`)._d;
+    this._price = formData.get(`event-price`);
+    this._offers = changedOffers[0].offers.filter((offer) => offer.isChosen === true);
   }
 
   setData(data) {
@@ -347,6 +378,9 @@ export default class EditEvent extends AbstractSmartComponent {
     this._type = event.type;
     this._offers = event.offers;
     this._city = event.city;
+    this._dateBegining = event.dateBegining;
+    this._dateEnding = event.dateEnding;
+    this._price = event.price;
 
     this.rerender();
   }
@@ -358,15 +392,17 @@ export default class EditEvent extends AbstractSmartComponent {
     if (eventsList) {
       eventsList.addEventListener(`change`, (evt) => {
         this._type = evt.target.value;
-        this._offers = this._offersList.filter((it) => it.type === this._type);
+        this._offers = this._offersList.filter((offerItem) => offerItem.type === this._type);
 
+        this._saveFormChanges();
         this.rerender();
       });
     }
 
     element.querySelector(`.event__input`).addEventListener(`change`, (evt) => {
-      this._city = this._destinationsList.find((it) => it.name === evt.target.value);
+      this._city = this._destinationsList.find((destinationItem) => destinationItem.name === evt.target.value);
 
+      this._saveFormChanges();
       this.rerender();
     });
   }
