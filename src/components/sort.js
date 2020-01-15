@@ -1,12 +1,5 @@
 import AbstractComponent from "./abstract-class";
 
-export const SortType = {
-  PRICE: `price`,
-  TIME: `time`,
-  DEFAULT: `event`,
-};
-
-
 const createSortTemplate = () => {
   return (
     `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
@@ -40,6 +33,12 @@ const createSortTemplate = () => {
         <span class="trip-sort__item  trip-sort__item--offers">Offers</span>
       </form>`
   );
+};
+
+export const SortType = {
+  PRICE: `price`,
+  TIME: `time`,
+  DEFAULT: `event`,
 };
 
 export default class Sort extends AbstractComponent {

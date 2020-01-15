@@ -6,7 +6,7 @@ import NoEventsComponent from '../components/no-events.js';
 import BoardComponent from '../components/board.js';
 import SortComponent, {SortType} from '../components/sort.js';
 import DayListComponent from '../components/day-list.js';
-import {Mode as TaskControllerMode, EmptyEvent} from './point.js';
+import {Mode as EventControllerMode, EmptyEvent} from './point.js';
 
 const HIDDEN_CLASS = `visually-hidden`;
 
@@ -22,7 +22,7 @@ const renderEvents = (eventsList, tripDaysElement, onDataChange, onViewChange, o
         (event) => {
           if (currentDate.getDate() === event.dateBegining.getDate() && tripEventsElement) { // Если даты совпадают и контейнер определён - просто добавляем элемент
             const pointController = new PointController(tripEventsElement, onDataChange, onViewChange, onFavoriteButtonChange, destinations, offers);
-            pointController.render(event, TaskControllerMode.DEFAULT);
+            pointController.render(event, EventControllerMode.DEFAULT);
             return pointController;
           } else {
             const listComponent = new DayListComponent(event.dateBegining, count); // Если не совпадают или нет контейнера, то создаём новый компонент с информацией о дате
@@ -30,7 +30,7 @@ const renderEvents = (eventsList, tripDaysElement, onDataChange, onViewChange, o
             tripEventsElement = listComponent.getElement().querySelector(`.trip-events__list`);
 
             const pointController = new PointController(tripEventsElement, onDataChange, onViewChange, onFavoriteButtonChange, destinations, offers);
-            pointController.render(event, TaskControllerMode.DEFAULT);
+            pointController.render(event, EventControllerMode.DEFAULT);
 
             currentDate = event.dateBegining;
             count++;
@@ -51,7 +51,7 @@ const renderSortedEvents = (eventsList, tripDaysElement, onDataChange, onViewCha
     .map(
         (event) => {
           const pointController = new PointController(tripEventsElement, onDataChange, onViewChange, onFavoriteButtonChange, destinations, offers);
-          pointController.render(event, TaskControllerMode.DEFAULT);
+          pointController.render(event, EventControllerMode.DEFAULT);
           return pointController;
         }
     );
@@ -86,18 +86,15 @@ export default class TripController {
   render() {
     const events = this._eventsModel.getEvents();
 
-    if (events.length === 0) {
-      render(this._container, this._noEventsComponent, RenderPosition.BEFOREEND);
+    if (this._eventsModel.getEventsAll().length === 0) {
+      this._createNoEvents();
       return;
     }
 
-    render(this._container, this._sortComponent, RenderPosition.BEFOREEND);
-    render(this._container, this._boardComponent, RenderPosition.BEFOREEND);
-
+    this._createSortAndBoard();
     this._updateTotalAndRoute(events);
 
     const tripDaysElement = this._container.querySelector(`.trip-days`);
-
     this._eventsList = renderEvents(events, tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
   }
 
@@ -107,12 +104,26 @@ export default class TripController {
     }
     this._onViewChange();
     if (!this._container.querySelector(`.trip-days`)) {
-      this._container.innerHTML = `<ul class="trip-days"></ul>`;
+      this._container.innerHTML = ``;
+      render(this._container, this._boardComponent, RenderPosition.BEFOREEND);
     }
     const tripDaysElement = this._container.querySelector(`.trip-days`);
     this._creatingEvent = new PointController(tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
-    this._creatingEvent.render(EmptyEvent, TaskControllerMode.ADDING);
-    this._eventsList.unshift(this._creatingEvent);
+    this._creatingEvent.render(EmptyEvent, EventControllerMode.ADDING);
+    if (this._eventsList) {
+      this._eventsList.unshift(this._creatingEvent);
+    }
+  }
+
+  _createNoEvents() {
+    this._container.innerHTML = ``;
+    render(this._container, this._noEventsComponent, RenderPosition.BEFOREEND);
+  }
+
+  _createSortAndBoard() {
+    this._container.innerHTML = ``;
+    render(this._container, this._sortComponent, RenderPosition.BEFOREEND);
+    render(this._container, this._boardComponent, RenderPosition.BEFOREEND);
   }
 
   _updateTotalAndRoute(events) {
@@ -132,6 +143,10 @@ export default class TripController {
   _updateEvents() {
     this._creatingEvent = null;
     this._removeEvents();
+    if (this._eventsModel.getEventsAll().length === 0) {
+      this._createNoEvents();
+      return;
+    }
     if (this._sortMode === SortType.DEFAULT) {
       this._renderEvents();
     } else {
@@ -140,21 +155,24 @@ export default class TripController {
   }
 
   _removeEvents() {
-    const tripDaysElement = this._container.querySelector(`.trip-days`);
-    tripDaysElement.innerHTML = ``;
+    if (this._container.querySelector(`.trip-days`)) {
+      const tripDaysElement = this._container.querySelector(`.trip-days`);
+      tripDaysElement.innerHTML = ``;
+    }
   }
 
   _renderEvents(events = this._eventsModel.getEvents()) {
-    if (events.length === 0) {
-      this._container.innerHTML = ``;
-      render(this._container, this._noEventsComponent, RenderPosition.BEFOREEND);
-      return;
+    if (!this._container.querySelector(`.trip-sort`)) {
+      this._createSortAndBoard();
     }
     const tripDaysElement = this._container.querySelector(`.trip-days`);
     this._eventsList = renderEvents(events, tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
   }
 
   _renderSortedEvents(events = this._eventsModel.getEvents()) {
+    if (!this._container.querySelector(`.trip-sort`)) {
+      this._createSortAndBoard();
+    }
     const tripDaysElement = this._container.querySelector(`.trip-days`);
     this._eventsList = renderSortedEvents(events, tripDaysElement, this._onDataChange, this._onViewChange, this._onFavoriteButtonChange, this._destinationsModel.getDestinations(), this._offersModel.getOffers());
   }
@@ -169,10 +187,10 @@ export default class TripController {
 
     switch (sortType) {
       case SortType.TIME:
-        sortedEvents = events.slice().sort((a, b) => (b.dateEnding.getTime() - b.dateBegining.getTime()) - (a.dateEnding.getTime() - a.dateBegining.getTime()));
+        sortedEvents = events.slice().sort((currtntEvent, nextEvent) => (nextEvent.dateEnding.getTime() - nextEvent.dateBegining.getTime()) - (currtntEvent.dateEnding.getTime() - currtntEvent.dateBegining.getTime()));
         break;
       case SortType.PRICE:
-        sortedEvents = events.slice().sort((a, b) => b.price - a.price);
+        sortedEvents = events.slice().sort((currtntEvent, nextEvent) => nextEvent.price - currtntEvent.price);
         break;
       case SortType.DEFAULT:
         sortedEvents = events.slice();
@@ -198,7 +216,7 @@ export default class TripController {
         this._api.createEvent(newData)
           .then((eventModel) => {
             this._eventsModel.addEvent(eventModel);
-            pointController.render(eventModel, TaskControllerMode.DEFAULT);
+            pointController.render(eventModel, EventControllerMode.DEFAULT);
             this._updateEvents();
             this._updateTotalAndRoute(this._eventsModel.getEventsAll());
           })
@@ -235,7 +253,7 @@ export default class TripController {
     this._api.updateEvent(oldData.id, newData)
       .then((eventModel) => {
         this._eventsModel.updateEvent(oldData.id, eventModel);
-        pointController.render(eventModel, TaskControllerMode.DEFAULT);
+        pointController.changeFavorite();
       })
       .catch(() => {
         pointController.shakeForFavorite();
@@ -245,7 +263,7 @@ export default class TripController {
   _onViewChange() {
     this._creatingEvent = null;
     if (this._eventsList) {
-      this._eventsList.forEach((it) => it.setDefaultView());
+      this._eventsList.forEach((eventItem) => eventItem.setDefaultView());
     }
   }
 

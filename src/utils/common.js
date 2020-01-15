@@ -20,7 +20,7 @@ export const findDateDifference = (startDate, endDate) => {
 
   const minutes = a.diff(b, `minutes`);
 
-  return [days, hours, minutes + 1];
+  return [days, hours, minutes];
 };
 
 export const formatDifference = (array) => {
@@ -31,4 +31,11 @@ export const formatDifference = (array) => {
 export const createDateDifference = (startDate, endDate) => {
   const difference = findDateDifference(startDate, endDate);
   return formatDifference(difference);
+};
+
+export const textCapitalize = (text) => {
+  if (text) {
+    return text[0].toUpperCase() + text.slice(1);
+  }
+  return ``;
 };

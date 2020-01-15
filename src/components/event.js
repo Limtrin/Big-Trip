@@ -1,14 +1,6 @@
 import {eventTypeTransfer} from '../constants.js';
-import {formatTimeEvent, createDateDifference} from '../utils/common.js';
+import {formatTimeEvent, createDateDifference, textCapitalize} from '../utils/common.js';
 import AbstractComponent from './abstract-class.js';
-
-const textCapitalize = (text) => {
-  if (text) {
-    return text[0].toUpperCase() + text.slice(1);
-  } else {
-    return ``;
-  }
-};
 
 const createOfferListMarkup = (offersList) => {
   return offersList
