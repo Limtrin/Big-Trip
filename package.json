@@ -14,6 +14,7 @@
     "eslint": "6.1.0",
     "eslint-config-htmlacademy": "0.5.2",
     "moment-locales-webpack-plugin": "1.1.2",
+    "lodash": "4.17.15"
     "style-loader": "1.0.1",
     "webpack": "4.41.2",
     "webpack-cli": "3.3.10",
@@ -27,7 +28,6 @@
     "chartjs-plugin-datalabels": "0.7.0",
     "flatpickr": "4.6.3",
     "moment": "2.24.0",
-    "nanoid": "2.1.9",
-    "lodash": "4.17.15"
+    "nanoid": "2.1.9"
   }
 }
