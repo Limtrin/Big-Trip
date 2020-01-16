@@ -93,8 +93,9 @@ export default class PointController {
       const data = parseFormData(formData, this._destinations, this._offers);
 
       const newEvent = EventModel.clone(event);
-      newEvent.isFavorite = !data.isFavorite;
+      newEvent.isFavorite = data.isFavorite;
       this._onFavoriteButtonChange(this, event, newEvent);
+      this._eventEditComponent.changeFavoriteStatus(data.isFavorite);
     });
 
     this._eventEditComponent.setSubmitHandler((evt) => {
@@ -133,10 +134,6 @@ export default class PointController {
         render(this._container, this._eventEditComponent, RenderPosition.AFTERBEGIN);
         break;
     }
-  }
-
-  changeFavorite() {
-    this._eventEditComponent.changeFavoriteStatus();
   }
 
   destroy() {
