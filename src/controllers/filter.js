@@ -1,6 +1,7 @@
 import {filterItems} from '../constants.js';
 import FilterComponent from '../components/filter.js';
 import {render, replace, RenderPosition} from '../utils/render.js';
+import {getEventsByFilter} from '../utils/filter.js';
 
 export default class FilterController {
   constructor(container, eventsModel) {
@@ -11,16 +12,21 @@ export default class FilterController {
     this._filterComponent = null;
 
     this._onFilterChange = this._onFilterChange.bind(this);
+    this._rerenderFiltersStatus = this._rerenderFiltersStatus.bind(this);
+
+    this._eventsModel.setDataChangeHandler(this._rerenderFiltersStatus);
   }
 
-  render() {
+  render(events) {
     const container = this._container;
     const filters = Object.values(filterItems).map((filterType) => {
       return {
         name: filterType,
-        checked: filterType === this._activeFilterType
+        checked: filterType === this._activeFilterType,
+        disabled: getEventsByFilter(events, filterType).length === 0
       };
     });
+
     const oldComponent = this._filterComponent;
 
     this._filterComponent = new FilterComponent(filters);
@@ -36,7 +42,11 @@ export default class FilterController {
   _onFilterChange(filterType) {
     this._eventsModel.setFilter(filterType);
     this._activeFilterType = filterType;
-    this.render();
+    this.render(this._eventsModel.getEventsAll());
+  }
+
+  _rerenderFiltersStatus(events = this._eventsModel.getEventsAll()) {
+    this.render(events);
   }
 
   hide() {

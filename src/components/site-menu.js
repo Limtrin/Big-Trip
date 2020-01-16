@@ -21,6 +21,7 @@ export default class Menu extends AbstractComponent {
   constructor() {
     super();
     this._menuItems = menuItems;
+    this._eventTarget = null;
   }
 
   getTemplate() {
@@ -34,9 +35,17 @@ export default class Menu extends AbstractComponent {
         return;
       }
 
-      [].forEach.call(evt.target.parentNode.children, (child) => child.classList.remove(CHECKED_CLASS));
+      if (evt.target === this._eventTarget) {
+        return;
+      }
+
+      [].forEach.call(evt.target.parentNode.children, (child) => {
+        child.classList.remove(CHECKED_CLASS);
+      });
 
       evt.target.classList.add(CHECKED_CLASS);
+
+      this._eventTarget = evt.target;
 
       const menuItem = evt.target.innerHTML;
 

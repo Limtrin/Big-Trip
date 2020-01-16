@@ -253,7 +253,6 @@ export default class TripController {
     this._api.updateEvent(oldData.id, newData)
       .then((eventModel) => {
         this._eventsModel.updateEvent(oldData.id, eventModel);
-        pointController.changeFavorite();
       })
       .catch(() => {
         pointController.shakeForFavorite();

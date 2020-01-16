@@ -1,5 +1,5 @@
 export const filterItems = {
-  EVERITHING: `everithing`,
+  EVERITHING: `everything`,
   FUTURE: `future`,
   PAST: `past`
 };

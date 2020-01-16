@@ -11,22 +11,20 @@ const createRouteTemplate = (events) => {
     eventsDates.push(dateBegining);
   });
 
-  const filteredCities = cities.filter((cityItem, index) => index === cities.indexOf(cityItem = cityItem.trim()));
-
   let totalCost;
 
-  switch (filteredCities.length) {
+  switch (cities.length) {
     case 1:
-      totalCost = `<h1 class="trip-info__title">${filteredCities[0]}`;
+      totalCost = `<h1 class="trip-info__title">${cities[0]}`;
       break;
     case 2:
-      totalCost = `<h1 class="trip-info__title">${filteredCities[0]} &mdash; ${filteredCities[1]}`;
+      totalCost = `<h1 class="trip-info__title">${cities[0]} &mdash; ${cities[1]}`;
       break;
     case 3:
-      totalCost = `<h1 class="trip-info__title">${filteredCities[0]} &mdash; ${filteredCities[1]} &mdash; ${cities[cities.length - 1]}</h1>`;
+      totalCost = `<h1 class="trip-info__title">${cities[0]} &mdash; ${cities[1]} &mdash; ${cities[cities.length - 1]}</h1>`;
       break;
     default:
-      totalCost = `<h1 class="trip-info__title">${filteredCities[0]} &mdash; ... &mdash; ${cities[cities.length - 1]}</h1>`;
+      totalCost = `<h1 class="trip-info__title">${cities[0]} &mdash; ... &mdash; ${cities[cities.length - 1]}</h1>`;
   }
 
 

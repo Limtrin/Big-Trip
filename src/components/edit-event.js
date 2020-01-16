@@ -1,9 +1,12 @@
+import debounce from 'lodash/debounce';
 import {eventTypeTransfer, eventTypeActivity} from '../constants.js';
 import {formatTime, textCapitalize} from '../utils/common.js';
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 import AbstractSmartComponent from './abstract-smart-component.js';
 import moment from 'moment';
+
+const DEBOUNCE_TIMEOUT = 500;
 
 const DefaultData = {
   deleteButtonText: `Delete`,
@@ -220,8 +223,8 @@ export default class EditEvent extends AbstractSmartComponent {
     });
   }
 
-  changeFavoriteStatus() {
-    this._isFavorite = !this._isFavorite;
+  changeFavoriteStatus(favoriteStatus) {
+    this._isFavorite = favoriteStatus;
     this._saveFormChanges();
     this.rerender();
   }
@@ -260,7 +263,7 @@ export default class EditEvent extends AbstractSmartComponent {
         enableTime: true,
         dateFormat: `d/m/Y H:i`,
         minDate: this.getData().get(`event-start-time`),
-        defaultDate: this.getData().get(`event-start-time`)
+        defaultDate: this.getData().get(`event-end-time`)
       });
     });
   }
@@ -346,7 +349,7 @@ export default class EditEvent extends AbstractSmartComponent {
   setFavoritesButtonClickHandler(handler) {
     if (!this._isNew) {
       this.getElement().querySelector(`.event__favorite-btn`)
-      .addEventListener(`click`, handler);
+      .addEventListener(`click`, debounce(handler, DEBOUNCE_TIMEOUT));
     }
 
     this._favoriteButtonHandler = handler;

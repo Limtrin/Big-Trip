@@ -5,8 +5,8 @@ const createFilterMarkup = (items) => {
   return Object.values(items)
     .map((item) => {
       return (
-        `<div class="trip-filters__filter">
-          <input id="filter-${item.name}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${item.name}" ${item.checked ? `checked` : ``}>
+        `<div class="trip-filters__filter" ${item.disabled ? `style="pointer-events: none; opacity: 0.4;"` : ``}>
+          <input id="filter-${item.name}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${item.name}" ${item.checked ? `checked` : ``} ${item.disabled ? `disabled` : ``}>
           <label class="trip-filters__filter-label" for="filter-everything">${textCapitalize(item.name)}</label>
         </div>`
       );
@@ -41,6 +41,10 @@ export default class Filter extends AbstractComponent {
       if (evt.target.tagName !== `LABEL`) {
         return;
       }
+      if (evt.target.parentNode.querySelector(`input`).hasAttribute(`disabled`)) {
+        return;
+      }
+
       const filterName = evt.target.parentNode.querySelector(`input`).value;
       handler(filterName);
     });
