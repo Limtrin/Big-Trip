@@ -254,16 +254,22 @@ export default class EditEvent extends AbstractSmartComponent {
   }
 
   _applyFlatpickerEndDate() {
-    const dateBeginingElement = this.getElement().querySelector(`#event-start-time-1`);
-    const dateEndingElement = this.getElement().querySelector(`#event-end-time-1`);
+    let dateBeginingElement = this.getElement().querySelector(`#event-start-time-1`);
 
     dateBeginingElement.addEventListener(`change`, () => {
+      dateBeginingElement = this.getElement().querySelector(`#event-start-time-1`);
+      const dateEndingElement = this.getElement().querySelector(`#event-end-time-1`);
+
+      const dateBegining = moment(dateBeginingElement.value, `DD/MM/YYYY HH:mm`)._d;
+      const dateEnding = moment(dateEndingElement.value, `DD/MM/YYYY HH:mm`)._d;
+      const defaultDate = moment(dateEnding).isAfter(dateBegining) ? this.getData().get(`event-end-time`) : this.getData().get(`event-start-time`);
+
       this._flatpickr = flatpickr(dateEndingElement, {
         allowInput: true,
         enableTime: true,
         dateFormat: `d/m/Y H:i`,
         minDate: this.getData().get(`event-start-time`),
-        defaultDate: this.getData().get(`event-end-time`)
+        defaultDate
       });
     });
   }
